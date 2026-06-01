@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { ShieldAlert, Terminal, Activity, History } from "lucide-react";
+import { Terminal, Activity, History } from "lucide-react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -14,16 +14,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen w-full bg-background flex-col md:flex-row">
       <aside className="w-full md:w-64 border-b md:border-r border-border bg-card flex flex-col">
-        <div className="p-6 flex items-center gap-3">
-          <div className="bg-primary/10 p-2 rounded-md">
-            <ShieldAlert className="h-6 w-6 text-primary" />
-          </div>
+        <div className="px-5 py-4 flex items-center gap-3 border-b border-border">
+          <img
+            src="/redlock-logo.png"
+            alt="RedLock"
+            className="h-10 w-10 rounded-md object-cover flex-shrink-0"
+          />
           <div>
-            <h1 className="font-bold text-lg leading-tight tracking-tight text-foreground">PROMPT<span className="text-primary">FW</span></h1>
-            <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">v2.1.0-alpha</p>
+            <h1 className="font-black text-lg leading-tight tracking-tight">
+              <span className="text-destructive">Red</span>
+              <span className="text-foreground">Lock</span>
+              <span className="text-primary text-sm font-bold">X</span>
+            </h1>
+            <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
+              Prompt Firewall
+            </p>
           </div>
         </div>
-        <nav className="flex-1 px-4 pb-4 flex md:flex-col gap-1 overflow-x-auto md:overflow-x-visible">
+        <nav className="flex-1 px-4 py-4 flex md:flex-col gap-1 overflow-x-auto md:overflow-x-visible">
           {navItems.map((item) => {
             const isActive = location === item.href;
             const Icon = item.icon;
@@ -44,6 +52,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
+
+        <div className="px-5 py-4 border-t border-border">
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-xs text-muted-foreground font-mono">
+              All systems operational
+            </span>
+          </div>
+        </div>
       </aside>
       <main className="flex-1 flex flex-col h-screen overflow-y-auto">
         <div className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full">
