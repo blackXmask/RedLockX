@@ -5,96 +5,147 @@ import { AnalyzePromptBody } from "@workspace/api-zod";
 
 const router = Router();
 
-const HYBRID_SPACE_URL = process.env["HYBRID_SPACE_URL"] ?? "";
-const ML_SPACE_URL = process.env["ML_SPACE_URL"] ?? "";
+const HYBRID_BASE =
+  "https://blackxmask-redlockx-hybrid-prompt-detector-space-v2.hf.space";
+const ML_BASE =
+  "https://blackxmask-redlockx-ml-deberta-v3-prompt-detector-space.hf.space";
 
-const ATTACK_TYPES = [
-  "prompt_injection",
-  "jailbreak",
-  "obfuscation_attack",
-  "role_play_manipulation",
-  "instruction_override",
-  "system_prompt_leak",
-  "indirect_injection",
-];
-
-function simulateHybridResult(prompt: string): { malicious_probability: number; cosine_similarity: number } {
-  const injectionKeywords = [
-    "ignore", "forget", "disregard", "override", "bypass",
-    "pretend", "roleplay", "jailbreak", "dan", "sudo",
-    "system prompt", "previous instructions", "you are now",
-    "act as", "new persona", "ignore all", "ignore previous",
-    "0r", "1nst", "1gnor", "pr3v", "instructi0n", "1nstruct",
-  ];
-  const lower = prompt.toLowerCase();
-  const matchCount = injectionKeywords.filter((kw) => lower.includes(kw)).length;
-  const hasLeet = /[0-9]/.test(prompt) && /[a-zA-Z]/.test(prompt) && matchCount > 0;
-  const hasAllCaps = prompt.split(" ").filter((w) => w.length > 3 && w === w.toUpperCase()).length > 2;
-
-  let base = 0.05 + matchCount * 0.15 + (hasLeet ? 0.2 : 0) + (hasAllCaps ? 0.1 : 0);
-  base = Math.min(0.9999, Math.max(0.001, base + (Math.random() * 0.05 - 0.025)));
-  const cosine = 1 - base + Math.random() * 0.1;
-
-  return { malicious_probability: base, cosine_similarity: Math.max(0.01, Math.min(0.99, cosine)) };
+interface MlAttackType {
+  label: string;
+  score: number;
 }
 
-function simulateMlResult(hybridProb: number): {
+interface MlData {
   status: string;
   confidence: number;
-  attack_type: { label: string; score: number };
-} {
-  const isDangerous = hybridProb > 0.5;
-  const confidence = isDangerous
-    ? 0.7 + Math.random() * 0.29
-    : 0.6 + Math.random() * 0.35;
-  const attackIdx = Math.floor(Math.random() * ATTACK_TYPES.length);
+  binary_confidence?: number;
+  attack_type?: MlAttackType;
+  attack_family?: { label: string; score: number };
+  trigger_words?: string[];
+}
+
+/**
+ * Call a Gradio 6 event-stream endpoint.
+ * 1. POST /gradio_api/call/{fn} with {"data": [...]} → get event_id
+ * 2. GET  /gradio_api/call/{fn}/{event_id} → SSE stream, wait for "complete"
+ */
+async function gradioCall(
+  baseUrl: string,
+  fn: string,
+  data: unknown[]
+): Promise<unknown[]> {
+  const postRes = await fetch(`${baseUrl}/gradio_api/call/${fn}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data }),
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (!postRes.ok) {
+    throw new Error(`Gradio submit failed: ${postRes.status}`);
+  }
+
+  const { event_id } = (await postRes.json()) as { event_id: string };
+
+  const sseRes = await fetch(
+    `${baseUrl}/gradio_api/call/${fn}/${event_id}`,
+    { signal: AbortSignal.timeout(30_000) }
+  );
+
+  if (!sseRes.ok || !sseRes.body) {
+    throw new Error(`Gradio stream failed: ${sseRes.status}`);
+  }
+
+  const reader = sseRes.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let lastEventName = "";
+  let resultData: unknown[] = [];
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+
+    for (const line of lines) {
+      if (line.startsWith("event: ")) {
+        lastEventName = line.slice(7).trim();
+      } else if (line.startsWith("data: ")) {
+        const raw = line.slice(6).trim();
+        if (lastEventName === "complete") {
+          resultData = JSON.parse(raw) as unknown[];
+          reader.cancel();
+          return resultData;
+        } else if (lastEventName === "error") {
+          throw new Error(`Gradio error: ${raw}`);
+        }
+      }
+    }
+  }
+
+  if (resultData.length > 0) return resultData;
+  throw new Error("Gradio stream ended without a complete event");
+}
+
+async function callHybridSpace(prompt: string) {
+  // Returns: [verdict_str, risk_percent_str, cosine_similarity_str]
+  const result = await gradioCall(HYBRID_BASE, "detect", [prompt]);
+  const verdictStr = String(result[0] ?? "");
+  const riskStr = String(result[1] ?? "0");
+
+  const riskMatch = riskStr.match(/[\d.]+/);
+  const riskPercent = riskMatch ? parseFloat(riskMatch[0]) : 0;
+
+  const isSafe = !verdictStr.toUpperCase().includes("MALICIOUS");
+
   return {
-    status: isDangerous ? "DANGEROUS" : "SAFE",
-    confidence,
-    attack_type: {
-      label: isDangerous ? ATTACK_TYPES[attackIdx]! : "none",
-      score: isDangerous ? 0.7 + Math.random() * 0.29 : 0.05 + Math.random() * 0.2,
-    },
+    verdictStr,
+    riskPercent,
+    isSafe,
   };
 }
 
-async function callHybridSpace(prompt: string): Promise<{ malicious_probability: number; cosine_similarity: number }> {
-  if (!HYBRID_SPACE_URL) {
-    return simulateHybridResult(prompt);
+async function callMlSpace(prompt: string): Promise<MlData> {
+  // Returns: [status_msg, json_output_str, html_output_str]
+  // Python logic: result[1] is the JSON string when len >= 3
+  const result = await gradioCall(ML_BASE, "detect", [prompt]);
+
+  let rawOutput: unknown;
+  if (Array.isArray(result) && result.length >= 3) {
+    rawOutput = result[1];
+  } else if (Array.isArray(result) && result.length === 2) {
+    rawOutput = result[0];
+  } else {
+    rawOutput = result[0] ?? {};
   }
-  const res = await fetch(HYBRID_SPACE_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data: [prompt] }),
-    signal: AbortSignal.timeout(10000),
-  });
-  if (!res.ok) throw new Error(`Hybrid space error: ${res.status}`);
-  const json = (await res.json()) as { data: Array<{ malicious_probability: number; cosine_similarity: number }> };
-  return json.data[0]!;
+
+  if (typeof rawOutput === "string") {
+    return JSON.parse(rawOutput) as MlData;
+  }
+  return rawOutput as MlData;
 }
 
-async function callMlSpace(prompt: string): Promise<{ status: string; confidence: number; attack_type: { label: string; score: number } }> {
-  if (!ML_SPACE_URL) {
-    const hybrid = simulateHybridResult(prompt);
-    return simulateMlResult(hybrid.malicious_probability);
-  }
-  const res = await fetch(ML_SPACE_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data: [prompt] }),
-    signal: AbortSignal.timeout(10000),
-  });
-  if (!res.ok) throw new Error(`ML space error: ${res.status}`);
-  const json = (await res.json()) as { data: Array<{ status: string; confidence: number; attack_type: { label: string; score: number } }> };
-  return json.data[0]!;
-}
+function buildExplanation(
+  verdict: string,
+  riskPercent: number,
+  mlData: MlData
+): string {
+  const attackLabel =
+    mlData.attack_type?.label?.replace(/_/g, " ") ?? "unknown pattern";
+  const attackScore = mlData.attack_type?.score ?? 0;
+  const triggerWords = mlData.trigger_words?.join(", ");
 
-function buildExplanation(verdict: string, hybridProb: number, mlResult: { status: string; confidence: number; attack_type: { label: string; score: number } }): string {
   if (verdict === "BLOCK") {
-    const attackLabel = mlResult.attack_type.label.replace(/_/g, " ");
-    return `This prompt was flagged as malicious. The hybrid model detected a ${(hybridProb * 100).toFixed(1)}% injection probability, and the DeBERTa model classified it as DANGEROUS with ${(mlResult.confidence * 100).toFixed(1)}% confidence. Primary attack pattern identified: ${attackLabel} (${(mlResult.attack_type.score * 100).toFixed(1)}% match). The prompt contains patterns consistent with attempts to override, manipulate, or exfiltrate LLM system instructions.`;
+    let msg = `This prompt was flagged as malicious. The hybrid model detected a ${riskPercent.toFixed(1)}% injection risk, and the DeBERTa model classified it as DANGEROUS with ${(mlData.confidence * 100).toFixed(1)}% confidence. Primary attack pattern: ${attackLabel} (${(attackScore * 100).toFixed(1)}% match).`;
+    if (triggerWords) {
+      msg += ` Trigger words detected: ${triggerWords}.`;
+    }
+    return msg;
   }
-  return `This prompt appears safe. The hybrid model detected a low injection probability of ${(hybridProb * 100).toFixed(1)}%, and the DeBERTa model classified it as SAFE with ${(mlResult.confidence * 100).toFixed(1)}% confidence. No significant injection patterns were detected.`;
+  return `This prompt appears safe. The hybrid model detected a low injection risk of ${riskPercent.toFixed(1)}%, and the DeBERTa model classified it as SAFE with ${(mlData.confidence * 100).toFixed(1)}% confidence. No significant injection patterns were detected.`;
 }
 
 router.post("/analyze", async (req, res) => {
@@ -111,21 +162,40 @@ router.post("/analyze", async (req, res) => {
     return;
   }
 
+  let hybridResult: Awaited<ReturnType<typeof callHybridSpace>>;
+  let mlData: MlData;
+
   try {
-    const [hybridResult, mlResult] = await Promise.all([
+    [hybridResult, mlData] = await Promise.all([
       callHybridSpace(prompt),
       callMlSpace(prompt),
     ]);
+  } catch (err) {
+    req.log.error({ err }, "HuggingFace Space call failed");
+    res.status(502).json({
+      error:
+        "Unable to reach the detection models. The spaces may be sleeping — please try again in a few seconds.",
+    });
+    return;
+  }
 
-    const hybridProb = hybridResult.malicious_probability;
-    const riskWeight = (0.6 * hybridProb) + (0.4 * mlResult.confidence * (mlResult.status === "DANGEROUS" ? 1 : 0));
-    const isAttack = hybridProb > 0.5 || mlResult.status === "DANGEROUS";
-    const verdict = isAttack ? "BLOCK" : "ALLOW";
-    const riskScore = Math.min(100, Math.max(0, riskWeight * 100));
-    const attackType = isAttack ? mlResult.attack_type.label : null;
+  const isAttack = !hybridResult.isSafe || mlData.status === "DANGEROUS";
+  const verdict = isAttack ? "BLOCK" : "ALLOW";
 
-    const explanation = buildExplanation(verdict, hybridProb, mlResult);
+  // Weighted blend: 0.6 × hybrid_risk + 0.4 × ml_confidence (when DANGEROUS)
+  const mlWeight = mlData.status === "DANGEROUS" ? mlData.confidence : 0;
+  const riskScore = Math.min(
+    100,
+    Math.max(0, 0.6 * hybridResult.riskPercent + 0.4 * mlWeight * 100)
+  );
 
+  const attackType = isAttack
+    ? (mlData.attack_type?.label ?? "prompt_injection")
+    : null;
+
+  const explanation = buildExplanation(verdict, hybridResult.riskPercent, mlData);
+
+  try {
     const [inserted] = await db
       .insert(analysisLogsTable)
       .values({
@@ -134,9 +204,9 @@ router.post("/analyze", async (req, res) => {
         riskScore,
         isSafe: !isAttack,
         attackType,
-        hybridProbability: hybridProb,
-        mlStatus: mlResult.status,
-        mlConfidence: mlResult.confidence,
+        hybridProbability: hybridResult.riskPercent / 100,
+        mlStatus: mlData.status,
+        mlConfidence: mlData.confidence,
         explanation,
       })
       .returning();
@@ -159,8 +229,8 @@ router.post("/analyze", async (req, res) => {
       createdAt: inserted.createdAt.toISOString(),
     });
   } catch (err) {
-    req.log.error({ err }, "Analysis failed");
-    res.status(500).json({ error: "Analysis failed. Please try again." });
+    req.log.error({ err }, "Failed to store analysis result");
+    res.status(500).json({ error: "Failed to store result" });
   }
 });
 
