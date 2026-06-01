@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "_QObRKiotKvef_Zxd0Y02"
+uri = "file://attached_assets/decision-pipeline.svg"
+type = "image"
+title = "Decision Pipeline — How BLOCK/ALLOW is decided"
