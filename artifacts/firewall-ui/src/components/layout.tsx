@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
 import { Terminal, Activity, History, Cpu, Radio } from "lucide-react";
+import { LogoWeb } from "@/components/logo-web";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -24,15 +25,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <span className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-primary/30" />
           <span className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-primary/30" />
 
-          <div className="relative">
+          <div className="relative flex items-center justify-center" style={{ width: 160, height: 160 }}>
+            <LogoWeb />
             <img
               src="/redlock-logo.png"
               alt="RedLock"
-              className="h-24 w-24 rounded-xl object-cover ring-1 ring-primary/20"
-              style={{ filter: "drop-shadow(0 0 12px rgba(0,229,255,0.2))" }}
+              className="relative z-10 h-20 w-20 object-contain"
+              style={{ filter: "drop-shadow(0 0 10px rgba(220,30,30,0.5))" }}
             />
-            {/* Live pulse ring */}
-            <span className="absolute -bottom-1 -right-1 flex h-3 w-3">
+            {/* Live pulse dot */}
+            <span className="absolute bottom-3 right-3 z-20 flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-50" />
               <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
             </span>
