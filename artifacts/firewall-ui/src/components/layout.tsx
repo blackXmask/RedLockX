@@ -14,22 +14,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen w-full bg-background flex-col md:flex-row">
       <aside className="w-full md:w-64 border-b md:border-r border-border bg-card flex flex-col">
-        <div className="px-5 py-4 flex items-center gap-3 border-b border-border">
+        <div className="px-5 py-5 flex flex-col items-center border-b border-border">
           <img
             src="/redlock-logo.png"
             alt="RedLock"
-            className="h-10 w-10 rounded-md object-cover flex-shrink-0"
+            className="h-16 w-16 rounded-xl object-cover"
           />
-          <div>
-            <h1 className="font-black text-lg leading-tight tracking-tight">
-              <span className="text-destructive">Red</span>
-              <span className="text-foreground">Lock</span>
-              <span className="text-primary text-sm font-bold">X</span>
-            </h1>
-            <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
-              Prompt Firewall
-            </p>
-          </div>
+          <p className="mt-2 text-xs text-muted-foreground font-mono tracking-widest">
+            by blackXmask
+          </p>
         </div>
         <nav className="flex-1 px-4 py-4 flex md:flex-col gap-1 overflow-x-auto md:overflow-x-visible">
           {navItems.map((item) => {
