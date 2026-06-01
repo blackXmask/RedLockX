@@ -1,0 +1,1 @@
+- [LLM Chat Architecture](llm-chat-arch.md) — firewall-gated chat uses shared analyze-engine.ts; zod must be in api-server dependencies (not just api-zod)

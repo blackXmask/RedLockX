@@ -128,3 +128,71 @@ export const GetRecentActivityResponseItem = zod.object({
 export const GetRecentActivityResponse = zod.array(GetRecentActivityResponseItem)
 
 
+/**
+ * @summary Get current LLM provider settings
+ */
+export const GetLlmSettingsResponse = zod.object({
+  "provider": zod.string(),
+  "model": zod.string(),
+  "hasApiKey": zod.boolean(),
+  "baseUrl": zod.string().nullish()
+})
+
+
+/**
+ * @summary Save LLM provider settings
+ */
+
+
+
+
+export const SaveLlmSettingsBody = zod.object({
+  "provider": zod.enum(['openai', 'groq', 'gemini', 'custom']),
+  "apiKey": zod.string().min(1),
+  "model": zod.string().min(1),
+  "baseUrl": zod.string().nullish()
+})
+
+export const SaveLlmSettingsResponse = zod.object({
+  "provider": zod.string(),
+  "model": zod.string(),
+  "hasApiKey": zod.boolean(),
+  "baseUrl": zod.string().nullish()
+})
+
+
+/**
+ * @summary Send a firewall-gated chat message to the configured LLM
+ */
+export const sendChatMessageBodyMessageMax = 10000;
+
+
+
+export const SendChatMessageBody = zod.object({
+  "message": zod.string().min(1).max(sendChatMessageBodyMessageMax),
+  "sessionId": zod.string().nullish(),
+  "history": zod.array(zod.object({
+  "role": zod.enum(['user', 'assistant', 'system']),
+  "content": zod.string()
+}))
+})
+
+export const SendChatMessageResponse = zod.object({
+  "blocked": zod.boolean(),
+  "sessionId": zod.string(),
+  "reply": zod.string().nullish(),
+  "analysis": zod.object({
+  "id": zod.number(),
+  "verdict": zod.enum(['BLOCK', 'ALLOW']),
+  "riskScore": zod.number(),
+  "isSafe": zod.boolean(),
+  "attackType": zod.string().nullable(),
+  "hybridProbability": zod.number(),
+  "mlStatus": zod.string(),
+  "mlConfidence": zod.number(),
+  "explanation": zod.string(),
+  "createdAt": zod.string()
+})
+})
+
+

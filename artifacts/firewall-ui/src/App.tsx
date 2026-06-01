@@ -9,13 +9,12 @@ import NotFound from "@/pages/not-found";
 import Analyzer from "@/pages/analyzer";
 import Dashboard from "@/pages/dashboard";
 import Logs from "@/pages/logs";
+import Chat from "@/pages/chat";
+import Settings from "@/pages/settings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
+    queries: { retry: 1, refetchOnWindowFocus: false },
   },
 });
 
@@ -24,8 +23,10 @@ function Router() {
     <Layout>
       <Switch>
         <Route path="/" component={Analyzer} />
+        <Route path="/chat" component={Chat} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/logs" component={Logs} />
+        <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

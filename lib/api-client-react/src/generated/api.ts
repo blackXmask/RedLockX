@@ -22,10 +22,14 @@ import type {
 import type {
   AnalysisResult,
   AttackTypeStat,
+  ChatRequest,
+  ChatResponse,
   DailyActivity,
   ErrorResponse,
   GetLogsParams,
   HealthStatus,
+  LlmSettingsInput,
+  LlmSettingsResponse,
   LogEntry,
   LogsResponse,
   PromptInput,
@@ -584,4 +588,223 @@ export function useGetRecentActivity<TData = Awaited<ReturnType<typeof getRecent
 
 
 
+
+export const getGetLlmSettingsUrl = () => {
+
+
+
+
+  return `/api/settings`
+}
+
+/**
+ * @summary Get current LLM provider settings
+ */
+export const getLlmSettings = async ( options?: RequestInit): Promise<LlmSettingsResponse> => {
+
+  return customFetch<LlmSettingsResponse>(getGetLlmSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLlmSettingsQueryKey = () => {
+    return [
+    `/api/settings`
+    ] as const;
+    }
+
+
+export const getGetLlmSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getLlmSettings>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLlmSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLlmSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLlmSettings>>> = ({ signal }) => getLlmSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLlmSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLlmSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getLlmSettings>>>
+export type GetLlmSettingsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get current LLM provider settings
+ */
+
+export function useGetLlmSettings<TData = Awaited<ReturnType<typeof getLlmSettings>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLlmSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLlmSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getSaveLlmSettingsUrl = () => {
+
+
+
+
+  return `/api/settings`
+}
+
+/**
+ * @summary Save LLM provider settings
+ */
+export const saveLlmSettings = async (llmSettingsInput: LlmSettingsInput, options?: RequestInit): Promise<LlmSettingsResponse> => {
+
+  return customFetch<LlmSettingsResponse>(getSaveLlmSettingsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      llmSettingsInput,)
+  }
+);}
+
+
+
+
+export const getSaveLlmSettingsMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveLlmSettings>>, TError,{data: BodyType<LlmSettingsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveLlmSettings>>, TError,{data: BodyType<LlmSettingsInput>}, TContext> => {
+
+const mutationKey = ['saveLlmSettings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveLlmSettings>>, {data: BodyType<LlmSettingsInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  saveLlmSettings(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveLlmSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof saveLlmSettings>>>
+    export type SaveLlmSettingsMutationBody = BodyType<LlmSettingsInput>
+    export type SaveLlmSettingsMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Save LLM provider settings
+ */
+export const useSaveLlmSettings = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveLlmSettings>>, TError,{data: BodyType<LlmSettingsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof saveLlmSettings>>,
+        TError,
+        {data: BodyType<LlmSettingsInput>},
+        TContext
+      > => {
+      return useMutation(getSaveLlmSettingsMutationOptions(options));
+    }
+
+export const getSendChatMessageUrl = () => {
+
+
+
+
+  return `/api/chat`
+}
+
+/**
+ * @summary Send a firewall-gated chat message to the configured LLM
+ */
+export const sendChatMessage = async (chatRequest: ChatRequest, options?: RequestInit): Promise<ChatResponse> => {
+
+  return customFetch<ChatResponse>(getSendChatMessageUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      chatRequest,)
+  }
+);}
+
+
+
+
+export const getSendChatMessageMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendChatMessage>>, TError,{data: BodyType<ChatRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendChatMessage>>, TError,{data: BodyType<ChatRequest>}, TContext> => {
+
+const mutationKey = ['sendChatMessage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendChatMessage>>, {data: BodyType<ChatRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  sendChatMessage(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof sendChatMessage>>>
+    export type SendChatMessageMutationBody = BodyType<ChatRequest>
+    export type SendChatMessageMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Send a firewall-gated chat message to the configured LLM
+ */
+export const useSendChatMessage = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendChatMessage>>, TError,{data: BodyType<ChatRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendChatMessage>>,
+        TError,
+        {data: BodyType<ChatRequest>},
+        TContext
+      > => {
+      return useMutation(getSendChatMessageMutationOptions(options));
+    }
 

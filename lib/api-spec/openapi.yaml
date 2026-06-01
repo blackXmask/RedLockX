@@ -16,6 +16,10 @@ tags:
     description: Analysis log history
   - name: stats
     description: Analytics and statistics
+  - name: settings
+    description: LLM provider settings
+  - name: chat
+    description: Firewall-gated LLM chat
 paths:
   /healthz:
     get:
@@ -152,6 +156,79 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/DailyActivity"
+
+  /settings:
+    get:
+      operationId: getLlmSettings
+      tags: [settings]
+      summary: Get current LLM provider settings
+      responses:
+        "200":
+          description: Current LLM settings (api_key masked)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LlmSettingsResponse"
+        "404":
+          description: No settings configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: saveLlmSettings
+      tags: [settings]
+      summary: Save LLM provider settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LlmSettingsInput"
+      responses:
+        "200":
+          description: Saved settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LlmSettingsResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /chat:
+    post:
+      operationId: sendChatMessage
+      tags: [chat]
+      summary: Send a firewall-gated chat message to the configured LLM
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatRequest"
+      responses:
+        "200":
+          description: Chat response (blocked or LLM reply)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: LLM not configured or unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
 components:
   schemas:
@@ -319,3 +396,83 @@ components:
       properties:
         error:
           type: string
+
+    LlmSettingsInput:
+      type: object
+      required:
+        - provider
+        - apiKey
+        - model
+      properties:
+        provider:
+          type: string
+          enum: [openai, groq, gemini, custom]
+        apiKey:
+          type: string
+          minLength: 1
+        model:
+          type: string
+          minLength: 1
+        baseUrl:
+          type: ["string", "null"]
+
+    LlmSettingsResponse:
+      type: object
+      required:
+        - provider
+        - model
+        - hasApiKey
+      properties:
+        provider:
+          type: string
+        model:
+          type: string
+        hasApiKey:
+          type: boolean
+        baseUrl:
+          type: ["string", "null"]
+
+    ChatHistoryMessage:
+      type: object
+      required:
+        - role
+        - content
+      properties:
+        role:
+          type: string
+          enum: [user, assistant, system]
+        content:
+          type: string
+
+    ChatRequest:
+      type: object
+      required:
+        - message
+        - history
+      properties:
+        message:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        sessionId:
+          type: ["string", "null"]
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatHistoryMessage"
+
+    ChatResponse:
+      type: object
+      required:
+        - blocked
+        - sessionId
+        - analysis
+      properties:
+        blocked:
+          type: boolean
+        sessionId:
+          type: string
+        reply:
+          type: ["string", "null"]
+        analysis:
+          $ref: "#/components/schemas/AnalysisResult"

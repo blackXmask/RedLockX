@@ -92,6 +92,67 @@ export interface ErrorResponse {
   error: string;
 }
 
+export type LlmSettingsInputProvider = typeof LlmSettingsInputProvider[keyof typeof LlmSettingsInputProvider];
+
+
+export const LlmSettingsInputProvider = {
+  openai: 'openai',
+  groq: 'groq',
+  gemini: 'gemini',
+  custom: 'custom',
+} as const;
+
+export interface LlmSettingsInput {
+  provider: LlmSettingsInputProvider;
+  /** @minLength 1 */
+  apiKey: string;
+  /** @minLength 1 */
+  model: string;
+  /** @nullable */
+  baseUrl?: string | null;
+}
+
+export interface LlmSettingsResponse {
+  provider: string;
+  model: string;
+  hasApiKey: boolean;
+  /** @nullable */
+  baseUrl?: string | null;
+}
+
+export type ChatHistoryMessageRole = typeof ChatHistoryMessageRole[keyof typeof ChatHistoryMessageRole];
+
+
+export const ChatHistoryMessageRole = {
+  user: 'user',
+  assistant: 'assistant',
+  system: 'system',
+} as const;
+
+export interface ChatHistoryMessage {
+  role: ChatHistoryMessageRole;
+  content: string;
+}
+
+export interface ChatRequest {
+  /**
+     * @minLength 1
+     * @maxLength 10000
+     */
+  message: string;
+  /** @nullable */
+  sessionId?: string | null;
+  history: ChatHistoryMessage[];
+}
+
+export interface ChatResponse {
+  blocked: boolean;
+  sessionId: string;
+  /** @nullable */
+  reply?: string | null;
+  analysis: AnalysisResult;
+}
+
 export type GetLogsParams = {
 limit?: number;
 offset?: number;

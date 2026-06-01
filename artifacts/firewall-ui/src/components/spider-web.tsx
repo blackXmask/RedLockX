@@ -57,8 +57,8 @@ export function SpiderWeb() {
       const dx = Math.min(x, w - x);
       const dy = Math.min(y, h - y);
       const nearEdge = Math.min(dx, dy);
-      if (nearEdge > margin) return 0.08;
-      return 0.08 + (1 - nearEdge / margin) * 0.55;
+      if (nearEdge > margin) return 0.06;
+      return 0.06 + (1 - nearEdge / margin) * 0.45;
     }
 
     function draw() {
@@ -94,7 +94,7 @@ export function SpiderWeb() {
             ctx!.beginPath();
             ctx!.moveTo(a.x, a.y);
             ctx!.lineTo(b.x, b.y);
-            ctx!.strokeStyle = `rgba(0, 229, 255, ${alpha})`;
+            ctx!.strokeStyle = `rgba(59, 130, 246, ${alpha})`;
             ctx!.lineWidth = proximityFade * 0.8;
             ctx!.stroke();
           }
@@ -105,13 +105,13 @@ export function SpiderWeb() {
         const ea = edgeProximityAlpha(n.x, n.y, w, h);
         ctx!.beginPath();
         ctx!.arc(n.x, n.y, n.size, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(0, 229, 255, ${ea * n.opacity})`;
+        ctx!.fillStyle = `rgba(99, 160, 255, ${ea * n.opacity})`;
         ctx!.fill();
 
         if (ea > 0.3) {
           ctx!.beginPath();
           ctx!.arc(n.x, n.y, n.size + 2, 0, Math.PI * 2);
-          ctx!.strokeStyle = `rgba(0, 229, 255, ${ea * 0.15})`;
+          ctx!.strokeStyle = `rgba(59, 130, 246, ${ea * 0.15})`;
           ctx!.lineWidth = 1;
           ctx!.stroke();
         }
@@ -134,7 +134,6 @@ export function SpiderWeb() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 1 }}
     />
   );
 }
