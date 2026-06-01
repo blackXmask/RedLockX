@@ -69,8 +69,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
+        {/* Community logo */}
+        <div className="px-4 py-4 border-t border-border/60 flex flex-col items-center gap-2">
+          <span className="text-[9px] text-muted-foreground/35 font-mono tracking-[0.18em] uppercase">Community</span>
+          <img
+            src="/community-logo.avif"
+            alt="Community"
+            className="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
+            style={{ filter: "drop-shadow(0 0 6px rgba(0,229,255,0.15))" }}
+          />
+        </div>
+
         {/* Status footer */}
-        <div className="px-4 py-4 border-t border-border/60 space-y-2">
+        <div className="px-4 py-3 border-t border-border/60 space-y-2">
           <div className="flex items-center gap-2">
             <Radio className="h-3 w-3 text-green-400" />
             <span className="text-[10px] text-muted-foreground/70 font-mono tracking-wider uppercase">
