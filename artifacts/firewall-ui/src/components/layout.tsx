@@ -18,9 +18,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <img
             src="/redlock-logo.png"
             alt="RedLock"
-            className="h-16 w-16 rounded-xl object-cover"
+            className="h-24 w-24 rounded-xl object-cover"
           />
-          <p className="mt-2 text-xs text-muted-foreground font-mono tracking-widest">
+          <p className="mt-2 text-[10px] text-muted-foreground/60 font-mono tracking-widest">
             by blackXmask
           </p>
         </div>
