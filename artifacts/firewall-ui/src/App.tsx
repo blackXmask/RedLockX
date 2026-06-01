@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
-import { Switch, Route, Router as WouterRouter, Link, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout";
+import { SpiderWeb } from "@/components/spider-web";
 import NotFound from "@/pages/not-found";
 import Analyzer from "@/pages/analyzer";
 import Dashboard from "@/pages/dashboard";
@@ -32,15 +33,16 @@ function Router() {
 }
 
 function App() {
-  // Force dark mode
   useEffect(() => {
     document.documentElement.classList.add("dark");
+    document.body.classList.add("scanlines");
   }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <SpiderWeb />
           <Router />
         </WouterRouter>
         <Toaster />
