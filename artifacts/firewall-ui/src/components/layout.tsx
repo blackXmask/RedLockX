@@ -1,7 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
 import { Terminal, Activity, History, Cpu, Radio, Settings2, Bot } from "lucide-react";
-import { LogoWeb } from "@/components/logo-web";
 
 const navItems = [
   { href: "/",          label: "Analyzer",  icon: Terminal },
@@ -19,27 +18,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* ── Desktop Sidebar ─────────────────────── */}
       <aside className="hidden md:flex w-60 border-r border-border/60 bg-[hsl(222,50%,3%)]/90 backdrop-blur-sm flex-col shrink-0">
         {/* Logo block */}
-        <div className="px-5 py-4 flex flex-col items-center border-b border-border/60 relative">
-          <span className="absolute top-2 left-2 w-3 h-3 border-t border-l border-primary/40" />
-          <span className="absolute top-2 right-2 w-3 h-3 border-t border-r border-primary/40" />
-          <span className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-primary/30" />
-          <span className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-primary/30" />
-
-          <div className="relative flex items-center justify-center" style={{ width: 140, height: 140 }}>
-            <LogoWeb />
+        <div className="px-5 py-6 flex flex-col items-center border-b border-border/60">
+          <div className="relative flex items-center justify-center mb-2">
             <img
               src="/redlock-logo.png"
               alt="RedLock"
-              className="relative z-10 h-18 w-18 object-contain"
-              style={{ width: 72, height: 72, filter: "drop-shadow(0 0 10px rgba(220,30,30,0.5))" }}
+              className="object-contain"
+              style={{ width: 110, height: 110, filter: "drop-shadow(0 0 18px rgba(220,30,30,0.55)) drop-shadow(0 0 6px rgba(220,30,30,0.3))" }}
             />
-            <span className="absolute bottom-2 right-2 z-20 flex h-3 w-3">
+            <span className="absolute bottom-1 right-1 flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-50" />
               <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
             </span>
           </div>
-
-          <p className="mt-1 text-[9px] text-muted-foreground/50 font-mono tracking-[0.2em] uppercase">
+          <p className="text-[9px] text-muted-foreground/50 font-mono tracking-[0.2em] uppercase">
             by blackXmask
           </p>
         </div>
