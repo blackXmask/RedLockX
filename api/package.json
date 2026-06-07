@@ -7,7 +7,10 @@
     "@vercel/node": "^1.15.4"
   },
   "devDependencies": {
-    "@types/node": "^20.19.42",
     "typescript": "~5.9.3"
+  },
+  "dependencies": {
+    "@types/node": "^20.19.42",
+    "@vercel/node": "^1.15.4"
   }
 }
