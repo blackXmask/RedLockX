@@ -1,0 +1,5 @@
+app = "redlockx-api"
+primary_region = "iad"
+
+[env]
+PORT = "8080"
