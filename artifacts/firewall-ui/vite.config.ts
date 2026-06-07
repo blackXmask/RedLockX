@@ -46,6 +46,8 @@ export default defineConfig({
   build: {
     // write to `dist` so Vercel finds the entrypoint `index.html` at the expected location
     outDir: path.resolve(import.meta.dirname, "dist"),
+    // disable sourcemaps in production builds to avoid sourcemap resolution errors
+    sourcemap: false,
     emptyOutDir: true,
   },
   server: {
