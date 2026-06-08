@@ -50,6 +50,15 @@ export default defineConfig({
     sourcemap: false,
     emptyOutDir: true,
   },
+  esbuild: {
+    // ensure esbuild doesn't generate or consume sourcemaps during transforms
+    sourcemap: false,
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      sourcemap: false,
+    },
+  },
   server: {
     port,
     strictPort: true,
