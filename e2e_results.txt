@@ -1,0 +1,33 @@
+﻿safe|200|{
+    "verdict":  "ALLOW",
+    "riskScore":  3,
+    "isSafe":  true,
+    "attackType":  null,
+    "hybridProbability":  0.05,
+    "mlStatus":  "SAFE",
+    "mlConfidence":  0.95,
+    "explanation":  "This prompt appears safe. The hybrid model detected a low injection risk of 5.0%, and the ML model classified it as SAFE with 95.0% confidence. No significant injection patterns were detected."
+}
+jailbreak|200|{
+    "verdict":  "BLOCK",
+    "riskScore":  84,
+    "isSafe":  false,
+    "attackType":  "jailbreak_attempt",
+    "hybridProbability":  0.8,
+    "mlStatus":  "DANGEROUS",
+    "mlConfidence":  0.8999999999999999,
+    "explanation":  "This prompt was flagged as malicious. The hybrid model detected a 80.0% injection risk, and the ML model classified it as DANGEROUS with 90.0% confidence. Primary attack pattern: jailbreak attempt (85.0% match). Trigger words detected: ignore previous, act as."
+}
+obfuscation|200|{
+    "verdict":  "BLOCK",
+    "riskScore":  65,
+    "isSafe":  false,
+    "attackType":  "obfuscation_attack",
+    "hybridProbability":  0.55,
+    "mlStatus":  "DANGEROUS",
+    "mlConfidence":  0.7999999999999999,
+    "explanation":  "This prompt was flagged as malicious. The hybrid model detected a 55.0% injection risk, and the ML model classified it as DANGEROUS with 80.0% confidence. Primary attack pattern: obfuscation attack (75.0% match). Trigger words detected: base64."
+}
+empty|400|
+missing|400|
+
