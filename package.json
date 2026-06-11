@@ -9,6 +9,7 @@
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
   "private": true,
+  "packageManager": "pnpm@9.8.0",
   "devDependencies": {
     "@rollup/rollup-win32-x64-msvc": "^4.61.1",
     "@tailwindcss/oxide-win32-x64-msvc": "^4.3.0",
@@ -17,5 +18,5 @@
     "typescript": "~5.9.3",
     "@vercel/node": "^1.11.0",
     "@types/node": "^20.9.4"
-  }
+      }
 }
