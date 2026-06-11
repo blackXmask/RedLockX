@@ -1,6 +1,3 @@
 {
-  "build": {
-    "command": "pnpm --filter @workspace/firewall-ui build"
-  },
   "outputDirectory": "artifacts/firewall-ui/dist"
 }
