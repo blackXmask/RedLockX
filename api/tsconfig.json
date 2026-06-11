@@ -6,8 +6,15 @@
     "moduleResolution": "NodeNext",
     "module": "NodeNext",
     "allowJs": true,
-    "skipLibCheck": true
+    "checkJs": false,
+    "skipLibCheck": true,
+    "typeRoots": [
+      "../types",
+      "./types",
+      "../node_modules/@types",
+      "./node_modules/@types"
+    ]
   },
-  "include": ["./**/*"],
+  "include": ["./**/*", "../types/**/*"],
   "exclude": ["node_modules"]
 }
