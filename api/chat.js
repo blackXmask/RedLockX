@@ -230,7 +230,7 @@ export default async function handler(req, res) {
   }
   const settings = settingsRows[0]
 
-  const analysis = buildAnalysis(message)
+  const analysis = await buildAnalysis(message)
   const createdAt = new Date().toISOString()
 
   const logRes = await fetch(`${base}/rest/v1/analysis_logs`, {
