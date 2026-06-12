@@ -1,0 +1,11 @@
+node_modules
+.git
+.gitignore
+*.md
+lib/
+scripts/
+api/
+types/
+attached_assets/
+artifacts/mockup-sandbox/
+artifacts/api-server/
