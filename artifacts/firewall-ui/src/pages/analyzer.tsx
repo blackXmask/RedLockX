@@ -15,6 +15,7 @@ import {
   ScanLine,
   Lock,
   Unlock,
+  AlertTriangle,
 } from "lucide-react";
 import { useAnalyzePrompt } from "@workspace/api-client-react";
 import type { AnalysisResult } from "@workspace/api-client-react/src/generated/api.schemas";
@@ -22,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   prompt: z.string().min(1, "Prompt is required").max(10000, "Prompt is too long"),
@@ -30,6 +32,8 @@ const formSchema = z.object({
 export default function Analyzer() {
   const [results, setResults] = useState<AnalysisResult[]>([]);
   const [isPulsing, setIsPulsing] = useState(false);
+  const [lastError, setLastError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -40,15 +44,29 @@ export default function Analyzer() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     setIsPulsing(true);
+    setLastError(null);
     analyzePrompt.mutate(
       { data: values },
       {
         onSuccess: (data) => {
           setResults((prev) => [data, ...prev]);
+          setLastError(null);
           form.reset();
           setIsPulsing(false);
         },
-        onError: () => setIsPulsing(false),
+        onError: (err) => {
+          setIsPulsing(false);
+          const msg =
+            (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+            (err as Error)?.message ??
+            "Analysis failed. The detection models may be sleeping — please try again.";
+          setLastError(msg);
+          toast({
+            variant: "destructive",
+            title: "Analysis Error",
+            description: msg,
+          });
+        },
       }
     );
   }
@@ -215,8 +233,18 @@ export default function Analyzer() {
             )}
           </div>
 
+          {lastError && (
+            <div className="flex items-start gap-3 px-4 py-3 rounded-xl border border-red-500/40 bg-red-950/30 text-sm text-red-300 font-mono">
+              <AlertTriangle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-red-400 mb-0.5">Analysis Failed</p>
+                <p className="text-red-300/80">{lastError}</p>
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col gap-4 overflow-y-auto pb-10">
-            {results.length === 0 && (
+            {results.length === 0 && !lastError && (
               <div className={`flex flex-col items-center justify-center text-center p-16 rounded-xl border-2 border-dashed transition-all duration-500 ${
                 isPulsing
                   ? "border-blue-500/50 bg-blue-500/5 shadow-[0_0_40px_rgba(59,130,246,0.1)]"
