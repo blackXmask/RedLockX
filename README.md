@@ -2,9 +2,8 @@
 
 <img src="artifacts/firewall-ui/public/redlock-logo.png" alt="RedLockX Logo" width="120" />
 
-# RedLockX
-
 ### AI-Powered Prompt Injection Firewall
+### AI for Civic Innovation Hackathon
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-RedLockX-red?style=for-the-badge&logoColor=white)](https://redlockx.vercel.app)
 [![HuggingFace](https://img.shields.io/badge/🤗_HuggingFace-Spaces-yellow?style=for-the-badge)](https://huggingface.co/blackxmask)
@@ -28,7 +27,7 @@
 
 ---
 
-## ⚡ What is RedLockX?
+## What is RedLockX?
 
 **RedLockX** is a production-ready **prompt injection firewall** that sits between your users and your LLM-powered applications. It detects jailbreaks, system prompt leaks, indirect injections, and obfuscation attacks before they reach your model — in under a second.
 
@@ -36,7 +35,7 @@
 User Input  →  [ RedLockX Firewall ]  →  Your LLM
                       ↓
             ┌─────────────────────┐
-            │  Hybrid Rule Engine  │  ← pattern + heuristic analysis
+            │  Hybrid Rule Engine  │  ← xgboost + Allmini-LM  
             │  DeBERTa-v3 ML Model │  ← fine-tuned transformer
             │  Decision Aggregator │  ← weighted verdict
             └─────────────────────┘
