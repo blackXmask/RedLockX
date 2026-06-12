@@ -8,7 +8,6 @@
 
 ### AI-Powered Prompt Injection Firewall
 
-[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-RedLockX-red?style=for-the-badge&logoColor=white)](https://redlockx.vercel.app)
 [![HuggingFace](https://img.shields.io/badge/🤗_HuggingFace-Spaces-yellow?style=for-the-badge)](https://huggingface.co/blackxmask)
 [![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://redlockx.vercel.app/)
 
