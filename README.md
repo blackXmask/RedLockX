@@ -1,9 +1,12 @@
 <div align="center">
+  
+
+
 
 <img src="artifacts/firewall-ui/public/redlock-logo.png" alt="RedLockX Logo" width="120" />
+<img width="100" height="100" alt="image" src="https://github.com/user-attachments/assets/24620bb7-cdc1-4894-adee-22a807dbfa5c" />
 
 ### AI-Powered Prompt Injection Firewall
-### AI for Civic Innovation Hackathon
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-RedLockX-red?style=for-the-badge&logoColor=white)](https://redlockx.vercel.app)
 [![HuggingFace](https://img.shields.io/badge/🤗_HuggingFace-Spaces-yellow?style=for-the-badge)](https://huggingface.co/blackxmask)
@@ -285,6 +288,11 @@ Pull requests welcome! Open an issue first to discuss major changes.
 ## 📄 License
 
 MIT © [blackXmask](https://github.com/blackXmask)
+
+---
+<div align="center">
+Meet the Team:  Abdullah-Uzair-Haseeb-Shaheer
+</div>
 
 ---
 
