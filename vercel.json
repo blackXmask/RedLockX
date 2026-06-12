@@ -1,0 +1,5 @@
+{
+  "buildCommand": "pnpm --filter @workspace/firewall-ui run build",
+  "outputDirectory": "artifacts/firewall-ui/dist",
+  "installCommand": "pnpm install --no-frozen-lockfile"
+}
