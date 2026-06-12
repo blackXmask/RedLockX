@@ -54,7 +54,7 @@ RedLockX runs a **dual-model parallel pipeline**:
 
 | Layer | Model | Role |
 |-------|-------|------|
-| 🔬 **Hybrid Engine** | Rule-based + statistical | Fast heuristic pre-filter |
+| 🔬 **Hybrid Engine** | All-MiniLM + XGboost | Fast heuristic pre-filter |
 | 🧬 **DeBERTa-v3** | Fine-tuned transformer | Deep semantic classification |
 | ⚖️ **Decision Node** | Weighted aggregator | Final ALLOW / BLOCK verdict |
 
