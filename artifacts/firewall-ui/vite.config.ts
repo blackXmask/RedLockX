@@ -49,6 +49,8 @@ export default defineConfig({
     // disable sourcemaps in production builds to avoid sourcemap resolution errors
     sourcemap: false,
     emptyOutDir: true,
+    // increase chunk size warning limit to avoid noisy warnings for large bundles (value in kB)
+    chunkSizeWarningLimit: 2000,
   },
   esbuild: {
     // ensure esbuild doesn't generate or consume sourcemaps during transforms
