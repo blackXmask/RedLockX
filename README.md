@@ -10,8 +10,7 @@
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-RedLockX-red?style=for-the-badge&logoColor=white)](https://redlockx.vercel.app)
 [![HuggingFace](https://img.shields.io/badge/🤗_HuggingFace-Spaces-yellow?style=for-the-badge)](https://huggingface.co/blackxmask)
-[![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.io)
-[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
+[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://redlockx.vercel.app/)
 
 ---
 
