@@ -2,7 +2,7 @@
 
 <img src="artifacts/firewall-ui/public/redlock-logo.png" alt="RedLockX Logo" width="120" />
 
-# 🔴 RedLockX
+# RedLockX
 
 ### AI-Powered Prompt Injection Firewall
 
