@@ -2,8 +2,8 @@
   
 
 
-
-<img src="artifacts/firewall-ui/public/redlock-logo.png" alt="RedLockX Logo" width="120" />
+<img width="100" height="100" alt="Screenshot 2026-01-30 020825" src="https://github.com/user-attachments/assets/c6ec9b8d-6e59-4239-8b7e-93cb2ce44aae" />
+<img src="artifacts/firewall-ui/public/redlock-logo.png"  width="120" />
 <img width="100" height="100" alt="image" src="https://github.com/user-attachments/assets/24620bb7-cdc1-4894-adee-22a807dbfa5c" />
 
 ### AI-Powered Prompt Injection Firewall
