@@ -50,7 +50,7 @@ export default async function handler(req, res) {
     const totalAllowed = totalAnalyzed - totalBlocked
     const todayAnalyzed = parseCount(todayRes.headers.get('Content-Range'))
     const todayBlocked = parseCount(todayBlockedRes.headers.get('Content-Range'))
-    const blockRate = totalAnalyzed > 0 ? totalBlocked / totalAnalyzed : 0
+    const blockRate = totalAnalyzed > 0 ? (totalBlocked / totalAnalyzed) * 100 : 0
 
     let avgRiskScore = 0
     if (riskRes.ok) {
