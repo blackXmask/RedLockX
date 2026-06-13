@@ -45,6 +45,8 @@ User Input  →  [ RedLockX Firewall ]  →  Your LLM
 ```
 
 ---
+## WorkFlow
+<img width="4419" height="2504" alt="workflow excalidraw" src="https://github.com/user-attachments/assets/f3da7932-24d3-4c78-b6be-5c840972b36e" />
 
 ## 🧠 Detection Architecture
 
@@ -55,6 +57,7 @@ RedLockX runs a **dual-model parallel pipeline**:
 | 🔬 **Hybrid Engine** | All-MiniLM + XGboost | Fast heuristic pre-filter |
 | 🧬 **DeBERTa-v3** | Fine-tuned transformer | Deep semantic classification |
 | ⚖️ **Decision Node** | Weighted aggregator | Final ALLOW / BLOCK verdict |
+
 
 ### Attack Types Detected
 
