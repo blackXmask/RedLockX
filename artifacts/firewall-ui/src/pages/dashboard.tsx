@@ -1,5 +1,4 @@
-import React from "react";
-import { format } from "date-fns";
+import React, { useState } from "react";
 import {
   useGetStats,
   useGetAttackTypeBreakdown,
@@ -8,11 +7,12 @@ import {
   getGetAttackTypeBreakdownQueryKey,
   getGetRecentActivityQueryKey,
 } from "@workspace/api-client-react";
-import { Shield, ShieldAlert, Activity, BarChart3, TrendingUp, Percent } from "lucide-react";
+import {
+  Shield, ShieldAlert, Activity, BarChart3,
+  TrendingUp, Percent, RefreshCw,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -25,29 +25,79 @@ import {
 } from "recharts";
 
 const ATTACK_COLORS = ["#ef4444","#f97316","#eab308","#3b82f6","#8b5cf6","#06b6d4"];
+const POLL_MS = 30_000;
+
+function fmtDate(iso: string) {
+  const [, m, d] = iso.split("-");
+  const months = ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${months[parseInt(m, 10)]} ${parseInt(d, 10)}`;
+}
+
+function fmtDateLong(iso: string) {
+  const [yr, m, d] = iso.split("-");
+  const months = ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${months[parseInt(m, 10)]} ${parseInt(d, 10)}, ${yr}`;
+}
 
 export default function Dashboard() {
-  const { data: stats, isLoading: isLoadingStats } = useGetStats({
-    query: { queryKey: getGetStatsQueryKey() },
+  const [lastRefresh, setLastRefresh] = useState(() => new Date());
+
+  const { data: stats, isLoading: isLoadingStats, refetch: refetchStats } = useGetStats({
+    query: {
+      queryKey: getGetStatsQueryKey(),
+      refetchInterval: POLL_MS,
+      staleTime: 10_000,
+    },
   });
-  const { data: attackTypes, isLoading: isLoadingTypes } = useGetAttackTypeBreakdown({
-    query: { queryKey: getGetAttackTypeBreakdownQueryKey() },
+  const { data: attackTypes, isLoading: isLoadingTypes, refetch: refetchTypes } = useGetAttackTypeBreakdown({
+    query: {
+      queryKey: getGetAttackTypeBreakdownQueryKey(),
+      refetchInterval: POLL_MS,
+      staleTime: 10_000,
+    },
   });
-  const { data: activity, isLoading: isLoadingActivity } = useGetRecentActivity({
-    query: { queryKey: getGetRecentActivityQueryKey() },
+  const { data: activity, isLoading: isLoadingActivity, refetch: refetchActivity } = useGetRecentActivity({
+    query: {
+      queryKey: getGetRecentActivityQueryKey(),
+      refetchInterval: POLL_MS,
+      staleTime: 10_000,
+    },
   });
+
+  function handleRefresh() {
+    refetchStats();
+    refetchTypes();
+    refetchActivity();
+    setLastRefresh(new Date());
+  }
+
+  const hasActivity = activity && activity.length > 0 && activity.some((d) => d.analyzed > 0);
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-black tracking-tight text-white">Dashboard</h2>
-          <p className="text-base text-slate-400 mt-0.5">Threat landscape & firewall traffic overview</p>
+          <p className="text-sm text-slate-500 font-mono mt-0.5">
+            Threat landscape & firewall traffic overview
+          </p>
         </div>
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/5">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs font-mono font-bold text-emerald-400 tracking-widest uppercase">Live</span>
+        <div className="flex items-center gap-3">
+          <span className="hidden md:block text-[10px] font-mono text-slate-600">
+            Updated {lastRefresh.toLocaleTimeString()}
+          </span>
+          <button
+            onClick={handleRefresh}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/60 hover:border-blue-500/50 hover:bg-blue-500/10 text-slate-400 hover:text-white transition-all text-xs font-mono"
+          >
+            <RefreshCw className="h-3 w-3" />
+            Refresh
+          </button>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs font-mono font-bold text-emerald-400 tracking-widest uppercase">Live</span>
+          </div>
         </div>
       </div>
 
@@ -83,133 +133,149 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Charts */}
+      {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Traffic chart */}
-        <div className="lg:col-span-2 rounded-xl border-2 border-slate-700/60 bg-[hsl(222,47%,5%)] overflow-hidden">
-          <div className="px-5 pt-5 pb-3 border-b border-slate-700/50 flex items-center justify-between">
+
+        {/* Traffic — grouped bar chart */}
+        <div className="lg:col-span-2 rounded-xl border border-slate-700/60 bg-[hsl(222,47%,4%)] overflow-hidden">
+          <div className="px-5 pt-5 pb-3 border-b border-slate-700/40 flex items-center justify-between">
             <div>
-              <p className="text-base font-bold text-white">Traffic Analysis</p>
-              <p className="text-xs text-slate-500 font-mono mt-0.5">Last 7 days — allowed vs blocked</p>
+              <p className="text-sm font-bold text-white tracking-wide">Traffic Analysis</p>
+              <p className="text-[11px] text-slate-500 font-mono mt-0.5">Last 7 days · allowed vs blocked</p>
             </div>
-            <div className="flex items-center gap-4 text-xs font-mono">
-              <span className="flex items-center gap-1.5 text-emerald-400"><span className="w-2 h-2 rounded-full bg-emerald-500" />Allowed</span>
-              <span className="flex items-center gap-1.5 text-red-400"><span className="w-2 h-2 rounded-full bg-red-500" />Blocked</span>
+            <div className="flex items-center gap-4 text-[11px] font-mono">
+              <span className="flex items-center gap-1.5 text-emerald-400">
+                <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />Allowed
+              </span>
+              <span className="flex items-center gap-1.5 text-red-400">
+                <span className="w-2.5 h-2.5 rounded-sm bg-red-500" />Blocked
+              </span>
             </div>
           </div>
-          <div className="p-4 h-[280px]">
+
+          <div className="p-5 h-[280px]">
             {isLoadingActivity ? (
               <Skeleton className="w-full h-full rounded-lg bg-slate-800/50" />
-            ) : activity && activity.length > 0 ? (
+            ) : hasActivity ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={activity} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="gBlocked" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0.02} />
-                    </linearGradient>
-                    <linearGradient id="gAllowed" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.35} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.02} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <BarChart
+                  data={activity}
+                  margin={{ top: 4, right: 4, left: -24, bottom: 0 }}
+                  barCategoryGap="28%"
+                  barGap={3}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="rgba(255,255,255,0.04)"
+                  />
                   <XAxis
                     dataKey="date"
-                    tickFormatter={(v: string) => {
-                      const [, m, d] = v.split("-");
-                      const months = ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-                      return `${months[parseInt(m, 10)]} ${parseInt(d, 10)}`;
-                    }}
-                    stroke="#475569"
-                    fontSize={11}
+                    tickFormatter={fmtDate}
+                    stroke="#334155"
+                    tick={{ fill: "#64748b", fontSize: 11, fontFamily: "monospace" }}
                     tickLine={false}
                     axisLine={false}
-                    fontFamily="monospace"
                   />
                   <YAxis
-                    stroke="#475569"
-                    fontSize={11}
+                    stroke="#334155"
+                    tick={{ fill: "#64748b", fontSize: 11, fontFamily: "monospace" }}
                     tickLine={false}
                     axisLine={false}
-                    fontFamily="monospace"
                     allowDecimals={false}
-                    domain={[0, "auto"]}
+                    width={32}
                   />
                   <Tooltip
-                    contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "12px" }}
-                    itemStyle={{ color: "#e2e8f0" }}
-                    labelStyle={{ color: "#94a3b8", marginBottom: "4px", fontFamily: "monospace" }}
-                    labelFormatter={(v: string) => {
-                      const [yr, m, d] = v.split("-");
-                      const months = ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-                      return `${months[parseInt(m, 10)]} ${parseInt(d, 10)}, ${yr}`;
+                    cursor={{ fill: "rgba(255,255,255,0.03)", radius: 4 }}
+                    contentStyle={{
+                      backgroundColor: "#0f172a",
+                      border: "1px solid #1e293b",
+                      borderRadius: "10px",
+                      fontSize: "12px",
+                      padding: "10px 14px",
                     }}
+                    itemStyle={{ color: "#e2e8f0", fontFamily: "monospace" }}
+                    labelStyle={{ color: "#94a3b8", marginBottom: "6px", fontFamily: "monospace", fontSize: "11px" }}
+                    labelFormatter={(v: string) => fmtDateLong(v)}
+                    formatter={(value: number, name: string) => [
+                      <span style={{ fontFamily: "monospace", fontWeight: 700 }}>{value}</span>,
+                      name,
+                    ]}
                   />
-                  <Area
-                    type="monotone"
-                    dataKey="allowed"
-                    stroke="#10b981"
-                    strokeWidth={2.5}
-                    fill="url(#gAllowed)"
-                    name="Allowed"
-                    dot={{ r: 3, fill: "#10b981", strokeWidth: 0 }}
-                    activeDot={{ r: 5, fill: "#10b981", strokeWidth: 0 }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="blocked"
-                    stroke="#ef4444"
-                    strokeWidth={2.5}
-                    fill="url(#gBlocked)"
-                    name="Blocked"
-                    dot={{ r: 3, fill: "#ef4444", strokeWidth: 0 }}
-                    activeDot={{ r: 5, fill: "#ef4444", strokeWidth: 0 }}
-                  />
-                </AreaChart>
+                  <Bar dataKey="allowed" name="Allowed" fill="#10b981" radius={[3, 3, 0, 0]} maxBarSize={28} />
+                  <Bar dataKey="blocked" name="Blocked" fill="#ef4444" radius={[3, 3, 0, 0]} maxBarSize={28} />
+                </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex h-full items-center justify-center">
+              <div className="flex flex-col h-full items-center justify-center gap-3">
+                <div className="h-12 w-12 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-center">
+                  <BarChart3 className="h-6 w-6 text-slate-600" />
+                </div>
                 <div className="text-center">
-                  <BarChart3 className="h-10 w-10 text-slate-700 mx-auto mb-2" />
-                  <p className="text-slate-600 text-sm font-mono">No activity data yet</p>
+                  <p className="text-slate-500 text-sm font-medium">No traffic data yet</p>
+                  <p className="text-slate-600 text-xs font-mono mt-1">Analyze a prompt to see activity here</p>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Attack types */}
-        <div className="rounded-xl border-2 border-slate-700/60 bg-[hsl(222,47%,5%)] overflow-hidden">
-          <div className="px-5 pt-5 pb-3 border-b border-slate-700/50">
-            <p className="text-base font-bold text-white">Attack Vectors</p>
-            <p className="text-xs text-slate-500 font-mono mt-0.5">Distribution of blocked payload types</p>
+        {/* Attack Vectors */}
+        <div className="rounded-xl border border-slate-700/60 bg-[hsl(222,47%,4%)] overflow-hidden">
+          <div className="px-5 pt-5 pb-3 border-b border-slate-700/40">
+            <p className="text-sm font-bold text-white tracking-wide">Attack Vectors</p>
+            <p className="text-[11px] text-slate-500 font-mono mt-0.5">Distribution of blocked payload types</p>
           </div>
-          <div className="p-4 h-[280px]">
+          <div className="p-5 h-[280px]">
             {isLoadingTypes ? (
               <Skeleton className="w-full h-full rounded-lg bg-slate-800/50" />
             ) : attackTypes && attackTypes.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={attackTypes} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} vertical={true} stroke="rgba(255,255,255,0.04)" />
-                  <XAxis type="number" hide />
+                <BarChart
+                  data={attackTypes}
+                  layout="vertical"
+                  margin={{ top: 0, right: 8, left: 4, bottom: 0 }}
+                  barSize={14}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    horizontal={false}
+                    stroke="rgba(255,255,255,0.03)"
+                  />
+                  <XAxis
+                    type="number"
+                    tick={{ fill: "#475569", fontSize: 10, fontFamily: "monospace" }}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
                   <YAxis
                     dataKey="attackType"
                     type="category"
                     axisLine={false}
                     tickLine={false}
-                    stroke="#64748b"
-                    fontSize={10}
-                    width={90}
-                    fontFamily="monospace"
-                    tickFormatter={(v: string) => v.replace(/_/g, " ").slice(0, 14)}
+                    tick={{ fill: "#64748b", fontSize: 10, fontFamily: "monospace" }}
+                    width={88}
+                    tickFormatter={(v: string) => v.replace(/_/g, " ")}
                   />
                   <Tooltip
                     cursor={{ fill: "rgba(255,255,255,0.03)" }}
-                    contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "12px" }}
-                    itemStyle={{ color: "#e2e8f0" }}
+                    contentStyle={{
+                      backgroundColor: "#0f172a",
+                      border: "1px solid #1e293b",
+                      borderRadius: "10px",
+                      fontSize: "12px",
+                      padding: "8px 12px",
+                    }}
+                    itemStyle={{ color: "#e2e8f0", fontFamily: "monospace" }}
+                    labelStyle={{ color: "#94a3b8", fontSize: "11px", fontFamily: "monospace" }}
+                    labelFormatter={(v: string) => v.replace(/_/g, " ")}
+                    formatter={(value: number) => [
+                      <span style={{ fontFamily: "monospace", fontWeight: 700 }}>{value} detections</span>,
+                      "",
+                    ]}
                   />
-                  <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={18}>
+                  <Bar dataKey="count" radius={[0, 4, 4, 0]}>
                     {attackTypes.map((_, i) => (
                       <Cell key={i} fill={ATTACK_COLORS[i % ATTACK_COLORS.length]} />
                     ))}
@@ -217,10 +283,13 @@ export default function Dashboard() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex h-full items-center justify-center">
+              <div className="flex flex-col h-full items-center justify-center gap-3">
+                <div className="h-12 w-12 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-center">
+                  <Shield className="h-6 w-6 text-slate-600" />
+                </div>
                 <div className="text-center">
-                  <Shield className="h-10 w-10 text-slate-700 mx-auto mb-2" />
-                  <p className="text-slate-600 text-sm font-mono">No attacks detected</p>
+                  <p className="text-slate-500 text-sm font-medium">No attacks detected</p>
+                  <p className="text-slate-600 text-xs font-mono mt-1">All clear — no blocked prompts yet</p>
                 </div>
               </div>
             )}
@@ -234,10 +303,10 @@ export default function Dashboard() {
 type Accent = "blue" | "red" | "yellow" | "purple";
 
 const accentMap: Record<Accent, { border: string; bg: string; text: string; iconBg: string }> = {
-  blue:   { border: "border-blue-500/40",   bg: "from-blue-500/8",   text: "text-blue-400",   iconBg: "bg-blue-500/15 border-blue-500/30" },
-  red:    { border: "border-red-500/40",    bg: "from-red-500/8",    text: "text-red-400",    iconBg: "bg-red-500/15 border-red-500/30" },
-  yellow: { border: "border-yellow-500/35", bg: "from-yellow-500/8", text: "text-yellow-400", iconBg: "bg-yellow-500/15 border-yellow-500/30" },
-  purple: { border: "border-purple-500/40", bg: "from-purple-500/8", text: "text-purple-400", iconBg: "bg-purple-500/15 border-purple-500/30" },
+  blue:   { border: "border-blue-500/30",   bg: "from-blue-500/6",   text: "text-blue-400",   iconBg: "bg-blue-500/10 border-blue-500/25" },
+  red:    { border: "border-red-500/30",    bg: "from-red-500/6",    text: "text-red-400",    iconBg: "bg-red-500/10 border-red-500/25" },
+  yellow: { border: "border-yellow-500/25", bg: "from-yellow-500/6", text: "text-yellow-400", iconBg: "bg-yellow-500/10 border-yellow-500/25" },
+  purple: { border: "border-purple-500/30", bg: "from-purple-500/6", text: "text-purple-400", iconBg: "bg-purple-500/10 border-purple-500/25" },
 };
 
 function StatCard({
@@ -247,9 +316,9 @@ function StatCard({
 }) {
   const a = accentMap[accent];
   return (
-    <div className={`rounded-xl border-2 ${a.border} bg-gradient-to-br ${a.bg} to-transparent bg-[hsl(222,47%,5%)] p-5 space-y-3`}>
+    <div className={`rounded-xl border ${a.border} bg-gradient-to-br ${a.bg} to-transparent bg-[hsl(222,47%,4%)] p-5 space-y-3`}>
       <div className="flex items-center justify-between">
-        <p className="text-xs font-mono uppercase tracking-widest text-slate-500">{title}</p>
+        <p className="text-[10px] font-mono uppercase tracking-widest text-slate-500">{title}</p>
         <div className={`flex h-8 w-8 items-center justify-center rounded-lg border ${a.iconBg}`}>
           {icon}
         </div>
