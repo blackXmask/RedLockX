@@ -21,6 +21,7 @@ import {
   XAxis,
   YAxis,
   Cell,
+  Legend,
 } from "recharts";
 
 const ATTACK_COLORS = ["#ef4444","#f97316","#eab308","#3b82f6","#8b5cf6","#06b6d4"];
@@ -104,33 +105,67 @@ export default function Dashboard() {
                 <AreaChart data={activity} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="gBlocked" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.35} />
-                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.4} />
+                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0.02} />
                     </linearGradient>
                     <linearGradient id="gAllowed" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.02} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
                   <XAxis
                     dataKey="date"
-                    tickFormatter={(v) => format(new Date(v), "MMM d")}
+                    tickFormatter={(v: string) => {
+                      const [, m, d] = v.split("-");
+                      const months = ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                      return `${months[parseInt(m, 10)]} ${parseInt(d, 10)}`;
+                    }}
                     stroke="#475569"
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
                     fontFamily="monospace"
                   />
-                  <YAxis stroke="#475569" fontSize={11} tickLine={false} axisLine={false} fontFamily="monospace" />
+                  <YAxis
+                    stroke="#475569"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    fontFamily="monospace"
+                    allowDecimals={false}
+                    domain={[0, "auto"]}
+                  />
                   <Tooltip
                     contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px", fontSize: "12px" }}
                     itemStyle={{ color: "#e2e8f0" }}
                     labelStyle={{ color: "#94a3b8", marginBottom: "4px", fontFamily: "monospace" }}
-                    labelFormatter={(v) => format(new Date(v), "MMM d, yyyy")}
+                    labelFormatter={(v: string) => {
+                      const [yr, m, d] = v.split("-");
+                      const months = ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                      return `${months[parseInt(m, 10)]} ${parseInt(d, 10)}, ${yr}`;
+                    }}
                   />
-                  <Area type="monotone" dataKey="allowed" stackId="1" stroke="#10b981" strokeWidth={2} fill="url(#gAllowed)" name="Allowed" />
-                  <Area type="monotone" dataKey="blocked" stackId="1" stroke="#ef4444" strokeWidth={2} fill="url(#gBlocked)" name="Blocked" />
+                  <Area
+                    type="monotone"
+                    dataKey="allowed"
+                    stroke="#10b981"
+                    strokeWidth={2.5}
+                    fill="url(#gAllowed)"
+                    name="Allowed"
+                    dot={{ r: 3, fill: "#10b981", strokeWidth: 0 }}
+                    activeDot={{ r: 5, fill: "#10b981", strokeWidth: 0 }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="blocked"
+                    stroke="#ef4444"
+                    strokeWidth={2.5}
+                    fill="url(#gBlocked)"
+                    name="Blocked"
+                    dot={{ r: 3, fill: "#ef4444", strokeWidth: 0 }}
+                    activeDot={{ r: 5, fill: "#ef4444", strokeWidth: 0 }}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
