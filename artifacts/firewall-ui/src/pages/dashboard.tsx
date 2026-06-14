@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import {
   useGetStats,
   useGetAttackTypeBreakdown,
@@ -10,7 +11,7 @@ import {
 import {
   Shield, ShieldAlert, Activity, BarChart3,
   TrendingUp, Percent, RefreshCw, Cpu, Lock,
-  AlertTriangle, CheckCircle, Zap, Clock,
+  AlertTriangle, CheckCircle, Zap, Clock, Home,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -151,6 +152,7 @@ function attackBadgeCls(type: string | null) {
 
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function Dashboard() {
+  const [, navigate] = useLocation();
   const [lastRefresh, setLastRefresh] = useState(() => new Date());
   const { logs: threatLogs, loading: feedLoading, reload: reloadFeed } = useLiveFeed(POLL_MS);
 
@@ -185,6 +187,11 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <button onClick={() => navigate("/")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/60 hover:border-primary/50 hover:bg-primary/10 text-slate-400 hover:text-white transition-all text-xs font-mono">
+            <Home className="h-3 w-3" />
+            <span className="hidden sm:inline">Home</span>
+          </button>
           <span className="hidden md:block text-[10px] font-mono text-slate-600">
             {lastRefresh.toLocaleTimeString()}
           </span>
