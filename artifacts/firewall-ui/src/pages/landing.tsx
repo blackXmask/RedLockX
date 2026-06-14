@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import {
-  Shield, Zap, Brain, ChevronRight, AlertTriangle,
+  Shield, Zap, Brain, ChevronRight, ChevronDown, AlertTriangle,
   Activity, BarChart3, MessageSquare, ExternalLink,
   FileWarning, Globe, Lock, Server, Menu, X
 } from "lucide-react";
@@ -80,15 +80,15 @@ function GlowDot() {
 function StatsBadge() {
   const { data: stats } = useGetStats();
   return (
-    <div className="inline-flex items-center gap-4 px-4 py-2 rounded-full border border-border/40 bg-card/30 backdrop-blur-sm text-xs font-mono text-muted-foreground">
+    <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 px-4 py-2 rounded-full border border-border/40 bg-card/30 backdrop-blur-sm text-xs font-mono text-muted-foreground">
       <span className="flex items-center gap-1.5"><GlowDot /><span className="text-green-400">LIVE</span></span>
       {stats && (
         <>
-          <span className="text-border">|</span>
+          <span className="hidden sm:inline text-border">|</span>
           <span><span className="text-foreground font-semibold">{stats.totalAnalyzed.toLocaleString()}</span> analyzed</span>
-          <span className="text-border">|</span>
+          <span className="hidden sm:inline text-border">|</span>
           <span><span className="text-red-400 font-semibold">{stats.totalBlocked.toLocaleString()}</span> blocked</span>
-          <span className="text-border">|</span>
+          <span className="hidden sm:inline text-border">|</span>
           <span><span className="text-foreground font-semibold">{stats.blockRate.toFixed(1)}%</span> block rate</span>
         </>
       )}
@@ -146,139 +146,157 @@ function AnimatedArchDiagram() {
   const pulse = (on: boolean, color: string) =>
     on ? `shadow-[0_0_20px_${color}] border-opacity-100` : "border-opacity-30";
 
-  return (
-    <div className="relative w-full overflow-x-auto">
-      <div className="min-w-[680px] mx-auto px-4">
-        {/* Top row: START → [parallel] → DECISION → VERDICT */}
-        <div className="flex items-center justify-between gap-2 py-8">
+  const startNode = (
+    <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 flex flex-col items-center justify-center text-center transition-all duration-500 ${
+      is("start") ? "border-primary bg-primary/15 shadow-[0_0_24px_rgba(59,130,246,0.5)]" : "border-border/40 bg-card/20"
+    }`}>
+      <span className="text-[9px] font-mono text-muted-foreground">USER</span>
+      <span className="text-base sm:text-lg">📝</span>
+      <span className="text-[8px] font-mono text-primary/80">INPUT</span>
+    </div>
+  );
 
-          {/* START node */}
-          <div className={`flex-shrink-0 flex flex-col items-center gap-2 transition-all duration-500`}>
-            <div className={`w-20 h-20 rounded-full border-2 flex flex-col items-center justify-center text-center transition-all duration-500 ${
-              is("start") ? "border-primary bg-primary/15 shadow-[0_0_24px_rgba(59,130,246,0.5)]" : "border-border/40 bg-card/20"
-            }`}>
-              <span className="text-[10px] font-mono text-muted-foreground">USER</span>
-              <span className="text-lg">📝</span>
-              <span className="text-[9px] font-mono text-primary/80">INPUT</span>
-            </div>
+  const hybridCard = (
+    <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 transition-all duration-500 ${
+      is("hybrid") || is("ml") || is("decision") || is("verdict")
+        ? "border-blue-500/70 bg-blue-950/30 shadow-[0_0_20px_rgba(59,130,246,0.25)]"
+        : "border-blue-500/20 bg-blue-950/10"
+    }`}>
+      <div className={`w-7 h-7 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 ${is("hybrid") || is("ml") ? "animate-pulse" : ""}`}>
+        <Brain className="h-3.5 w-3.5 text-blue-400" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-bold text-blue-300 font-mono">Hybrid Layer</p>
+        <p className="text-[9px] text-blue-300/60 font-mono">XGBoost + All-MiniLM</p>
+        <p className="text-[9px] text-blue-300/40">98.4% acc</p>
+      </div>
+      {(is("hybrid") || is("ml")) && <span className="w-2 h-2 rounded-full bg-blue-400 animate-ping flex-shrink-0" />}
+    </div>
+  );
+
+  const mlCard = (
+    <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 transition-all duration-500 ${
+      is("hybrid") || is("ml") || is("decision") || is("verdict")
+        ? "border-purple-500/70 bg-purple-950/30 shadow-[0_0_20px_rgba(168,85,247,0.25)]"
+        : "border-purple-500/20 bg-purple-950/10"
+    }`}>
+      <div className={`w-7 h-7 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 ${is("hybrid") || is("ml") ? "animate-pulse" : ""}`}>
+        <Shield className="h-3.5 w-3.5 text-purple-400" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-bold text-purple-300 font-mono">ML Layer</p>
+        <p className="text-[9px] text-purple-300/60 font-mono">DeBERTa-v3</p>
+        <p className="text-[9px] text-purple-300/40">92.5% acc</p>
+      </div>
+      {(is("hybrid") || is("ml")) && <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping flex-shrink-0" />}
+    </div>
+  );
+
+  const decisionNode = (
+    <div className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 flex flex-col items-center justify-center text-center transition-all duration-500 ${
+      is("decision") ? "border-yellow-400/80 bg-yellow-950/30 shadow-[0_0_28px_rgba(250,204,21,0.4)]"
+        : is("verdict") ? "border-yellow-400/40 bg-yellow-950/10" : "border-border/30 bg-card/20"
+    }`}>
+      {is("decision") && <span className="absolute inset-0 rounded-full border-2 border-yellow-400/30 animate-ping" />}
+      <Zap className={`h-4 w-4 mb-0.5 transition-colors ${is("decision") ? "text-yellow-400" : "text-muted-foreground/40"}`} />
+      <span className={`text-[9px] font-mono font-bold transition-colors ${is("decision") ? "text-yellow-300" : "text-muted-foreground/50"}`}>DECISION</span>
+      <span className="text-[8px] font-mono text-muted-foreground/30">NODE</span>
+    </div>
+  );
+
+  const verdictPair = (
+    <div className="flex gap-3">
+      <div className={`w-16 sm:w-20 px-2 py-2.5 rounded-xl border-2 flex flex-col items-center gap-1 transition-all duration-500 ${
+        verdict === "allow" && is("verdict") ? "border-green-400/80 bg-green-950/40 shadow-[0_0_24px_rgba(34,197,94,0.5)] scale-110" : "border-green-500/20 bg-green-950/10"
+      }`}>
+        <span className="text-base">{verdict === "allow" && is("verdict") ? "✅" : "🟢"}</span>
+        <span className={`text-[10px] font-mono font-bold ${verdict === "allow" && is("verdict") ? "text-green-300" : "text-green-500/40"}`}>ALLOW</span>
+      </div>
+      <div className={`w-16 sm:w-20 px-2 py-2.5 rounded-xl border-2 flex flex-col items-center gap-1 transition-all duration-500 ${
+        verdict === "block" && is("verdict") ? "border-red-400/80 bg-red-950/40 shadow-[0_0_24px_rgba(239,68,68,0.5)] scale-110" : "border-red-500/20 bg-red-950/10"
+      }`}>
+        <span className="text-base">{verdict === "block" && is("verdict") ? "🛑" : "🔴"}</span>
+        <span className={`text-[10px] font-mono font-bold ${verdict === "block" && is("verdict") ? "text-red-300" : "text-red-500/40"}`}>BLOCK</span>
+      </div>
+    </div>
+  );
+
+  const ticker = (
+    <div className="mt-3 px-3 py-2 rounded-lg border border-border/20 bg-black/30 font-mono text-[10px] sm:text-[11px] text-muted-foreground/60 overflow-x-auto whitespace-nowrap">
+      <span className="text-primary/50">state = </span>
+      <span className="text-green-400/70">&#123;</span>
+      <span className="text-blue-300/80"> verdict</span>: <span className="text-yellow-300/80">"{is("verdict") ? (verdict === "block" ? "BLOCK" : "ALLOW") : is("decision") ? "computing…" : is("hybrid") || is("ml") ? "analyzing…" : "awaiting"}"</span>
+      {is("verdict") && verdict && (
+        <>, <span className="text-blue-300/80"> risk</span>: <span className="text-orange-300/80">{verdict === "block" ? Math.floor(85 + Math.random() * 15) : Math.floor(Math.random() * 8)}%</span></>
+      )}
+      <span className="text-green-400/70"> &#125;</span>
+    </div>
+  );
+
+  return (
+    <div className="relative w-full">
+      {/* ── MOBILE: vertical ── */}
+      <div className="md:hidden flex flex-col items-center py-4 gap-0">
+        <div className="flex flex-col items-center gap-1">
+          {startNode}
+          <span className="text-[9px] font-mono text-muted-foreground/60 mt-1">START</span>
+        </div>
+        <DownArrow active={is("start")} label="prompt" />
+        <div className="flex flex-col items-center w-full max-w-xs gap-2 px-4">
+          {hybridCard}
+          <div className={`w-1 h-4 rounded-full transition-colors duration-500 ${is("hybrid") || is("ml") ? "bg-gradient-to-b from-blue-500 to-purple-500" : "bg-border/20"}`} />
+          {mlCard}
+          <span className="text-[9px] font-mono text-muted-foreground/40 mt-1">🤗 HF SPACES · PARALLEL</span>
+        </div>
+        <DownArrow active={is("decision") || is("verdict")} label="scores" />
+        <div className="flex flex-col items-center gap-1">
+          {decisionNode}
+          <span className="text-[9px] font-mono text-muted-foreground/60">LangGraph</span>
+        </div>
+        <DownArrow active={is("verdict")} label="verdict" />
+        <div className="flex flex-col items-center gap-1">
+          {verdictPair}
+          <span className="text-[9px] font-mono text-muted-foreground/60 mt-1">END</span>
+        </div>
+        {ticker}
+        <div className="mt-3 flex justify-between w-full text-[9px] font-mono text-muted-foreground/30 px-2">
+          <span className={is("start") ? "text-primary/60" : ""}>① INIT</span>
+          <span className={is("hybrid") || is("ml") ? "text-blue-400/60" : ""}>② PARALLEL</span>
+          <span className={is("decision") ? "text-yellow-400/60" : ""}>③ MERGE</span>
+          <span className={is("verdict") ? (verdict === "block" ? "text-red-400/60" : "text-green-400/60") : ""}>④ OUT</span>
+        </div>
+      </div>
+
+      {/* ── DESKTOP: horizontal ── */}
+      <div className="hidden md:block px-4">
+        <div className="flex items-center justify-between gap-2 py-8">
+          <div className="flex-shrink-0 flex flex-col items-center gap-2">
+            {startNode}
             <span className="text-[10px] font-mono text-muted-foreground/60">START</span>
           </div>
-
-          {/* Arrow + label */}
           <ArrowFlow active={is("start")} label="prompt" />
-
-          {/* Parallel block */}
           <div className="flex-shrink-0 flex flex-col gap-3 relative">
-            {/* Hybrid layer */}
-            <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-500 ${
-              is("hybrid") || is("ml") || is("decision") || is("verdict")
-                ? "border-blue-500/70 bg-blue-950/30 shadow-[0_0_20px_rgba(59,130,246,0.25)]"
-                : "border-blue-500/20 bg-blue-950/10"
-            }`}>
-              <div className={`w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center transition-all duration-300 ${is("hybrid") || is("ml") ? "animate-pulse" : ""}`}>
-                <Brain className="h-4 w-4 text-blue-400" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-blue-300 font-mono">Hybrid Layer</p>
-                <p className="text-[10px] text-blue-300/60 font-mono">XGBoost + All-MiniLM</p>
-                <p className="text-[10px] text-blue-300/40">98.4% acc · fast filter</p>
-              </div>
-              {(is("hybrid") || is("ml")) && (
-                <span className="ml-2 w-2 h-2 rounded-full bg-blue-400 animate-ping flex-shrink-0" />
-              )}
-            </div>
-
-            {/* Parallel label */}
+            {hybridCard}
             <div className="absolute -right-3 top-1/2 -translate-y-1/2 z-10">
               <div className={`w-1 h-12 rounded-full transition-all duration-500 ${is("hybrid") || is("ml") ? "bg-gradient-to-b from-blue-500 via-purple-500 to-purple-500 opacity-80" : "bg-border/20"}`} />
             </div>
-
-            {/* DeBERTa layer */}
-            <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-500 ${
-              is("hybrid") || is("ml") || is("decision") || is("verdict")
-                ? "border-purple-500/70 bg-purple-950/30 shadow-[0_0_20px_rgba(168,85,247,0.25)]"
-                : "border-purple-500/20 bg-purple-950/10"
-            }`}>
-              <div className={`w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center transition-all duration-300 ${is("hybrid") || is("ml") ? "animate-pulse" : ""}`}>
-                <Shield className="h-4 w-4 text-purple-400" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-purple-300 font-mono">ML Layer</p>
-                <p className="text-[10px] text-purple-300/60 font-mono">Microsoft DeBERTa-v3</p>
-                <p className="text-[10px] text-purple-300/40">92.5% acc · deep semantic</p>
-              </div>
-              {(is("hybrid") || is("ml")) && (
-                <span className="ml-2 w-2 h-2 rounded-full bg-purple-400 animate-ping flex-shrink-0" />
-              )}
-            </div>
-
-            {/* HF Spaces label */}
+            {mlCard}
             <div className="text-center">
               <span className="text-[9px] font-mono text-muted-foreground/40 tracking-wider">🤗 HF SPACES · PARALLEL</span>
             </div>
           </div>
-
-          {/* Arrow */}
           <ArrowFlow active={is("decision") || is("verdict")} label="scores" />
-
-          {/* Decision node */}
           <div className="flex-shrink-0 flex flex-col items-center gap-2">
-            <div className={`w-24 h-24 rounded-full border-2 flex flex-col items-center justify-center text-center transition-all duration-500 ${
-              is("decision")
-                ? "border-yellow-400/80 bg-yellow-950/30 shadow-[0_0_28px_rgba(250,204,21,0.4)]"
-                : is("verdict")
-                ? "border-yellow-400/40 bg-yellow-950/10"
-                : "border-border/30 bg-card/20"
-            }`}>
-              {is("decision") && <span className="absolute w-24 h-24 rounded-full border-2 border-yellow-400/30 animate-ping" />}
-              <Zap className={`h-5 w-5 mb-1 transition-colors ${is("decision") ? "text-yellow-400" : "text-muted-foreground/40"}`} />
-              <span className={`text-[10px] font-mono font-bold transition-colors ${is("decision") ? "text-yellow-300" : "text-muted-foreground/50"}`}>DECISION</span>
-              <span className="text-[9px] font-mono text-muted-foreground/30">NODE</span>
-            </div>
+            {decisionNode}
             <span className="text-[10px] font-mono text-muted-foreground/60">LangGraph</span>
           </div>
-
-          {/* Arrow */}
           <ArrowFlow active={is("verdict")} label="verdict" />
-
-          {/* Verdict */}
           <div className="flex-shrink-0 flex flex-col items-center gap-3">
-            {/* ALLOW */}
-            <div className={`w-20 px-2 py-3 rounded-xl border-2 flex flex-col items-center gap-1 transition-all duration-500 ${
-              verdict === "allow" && is("verdict")
-                ? "border-green-400/80 bg-green-950/40 shadow-[0_0_24px_rgba(34,197,94,0.5)] scale-110"
-                : "border-green-500/20 bg-green-950/10 scale-100"
-            }`}>
-              <span className="text-lg">{verdict === "allow" && is("verdict") ? "✅" : "🟢"}</span>
-              <span className={`text-[11px] font-mono font-bold transition-colors ${verdict === "allow" && is("verdict") ? "text-green-300" : "text-green-500/40"}`}>ALLOW</span>
-              <span className="text-[9px] font-mono text-muted-foreground/30">safe</span>
-            </div>
-            {/* BLOCK */}
-            <div className={`w-20 px-2 py-3 rounded-xl border-2 flex flex-col items-center gap-1 transition-all duration-500 ${
-              verdict === "block" && is("verdict")
-                ? "border-red-400/80 bg-red-950/40 shadow-[0_0_24px_rgba(239,68,68,0.5)] scale-110"
-                : "border-red-500/20 bg-red-950/10 scale-100"
-            }`}>
-              <span className="text-lg">{verdict === "block" && is("verdict") ? "🛑" : "🔴"}</span>
-              <span className={`text-[11px] font-mono font-bold transition-colors ${verdict === "block" && is("verdict") ? "text-red-300" : "text-red-500/40"}`}>BLOCK</span>
-              <span className="text-[9px] font-mono text-muted-foreground/30">threat</span>
-            </div>
+            {verdictPair}
             <span className="text-[10px] font-mono text-muted-foreground/60">END</span>
           </div>
         </div>
-
-        {/* State JSON ticker */}
-        <div className="mt-2 px-4 py-3 rounded-lg border border-border/20 bg-black/30 font-mono text-[11px] text-muted-foreground/60">
-          <span className="text-primary/50">state = </span>
-          <span className="text-green-400/70">&#123;</span>
-          <span className="text-blue-300/80"> verdict</span>: <span className="text-yellow-300/80">"{is("verdict") ? (verdict === "block" ? "BLOCK" : "ALLOW") : is("decision") ? "computing…" : is("hybrid") || is("ml") ? "analyzing…" : "awaiting"}"</span>
-          {is("verdict") && verdict && (
-            <>, <span className="text-blue-300/80"> risk</span>: <span className="text-orange-300/80">{verdict === "block" ? Math.floor(85 + Math.random() * 15) : Math.floor(Math.random() * 8)}%</span></>
-          )}
-          <span className="text-green-400/70"> &#125;</span>
-        </div>
-
-        {/* Step labels */}
+        {ticker}
         <div className="mt-4 flex justify-between text-[9px] font-mono text-muted-foreground/30 px-2">
           <span className={is("start") ? "text-primary/60" : ""}>① INIT</span>
           <span className={is("hybrid") || is("ml") ? "text-blue-400/60" : ""}>② PARALLEL INFERENCE</span>
@@ -292,7 +310,7 @@ function AnimatedArchDiagram() {
 
 function ArrowFlow({ active, label }: { active: boolean; label: string }) {
   return (
-    <div className="flex-1 flex flex-col items-center gap-1 min-w-[40px]">
+    <div className="flex-1 flex flex-col items-center gap-1 min-w-[28px]">
       <div className="relative w-full flex items-center">
         <div className={`h-px flex-1 transition-all duration-500 ${active ? "bg-primary/70" : "bg-border/20"}`} />
         {active && (
@@ -302,6 +320,16 @@ function ArrowFlow({ active, label }: { active: boolean; label: string }) {
         )}
         <ChevronRight className={`h-3 w-3 flex-shrink-0 transition-colors duration-300 ${active ? "text-primary" : "text-border/30"}`} />
       </div>
+      <span className={`text-[9px] font-mono transition-colors ${active ? "text-primary/60" : "text-muted-foreground/20"}`}>{label}</span>
+    </div>
+  );
+}
+
+function DownArrow({ active, label }: { active: boolean; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-0.5 py-1">
+      <div className={`w-px h-5 transition-all duration-500 ${active ? "bg-primary/70" : "bg-border/20"}`} />
+      <ChevronDown className={`h-3 w-3 transition-colors duration-300 ${active ? "text-primary" : "text-border/30"}`} />
       <span className={`text-[9px] font-mono transition-colors ${active ? "text-primary/60" : "text-muted-foreground/20"}`}>{label}</span>
     </div>
   );
@@ -449,7 +477,7 @@ export default function Landing() {
       <div className="h-14" />
 
       {/* ── HERO ────────────────────────────────── */}
-      <section className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-6 py-24 overflow-hidden">
+      <section className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-4 sm:px-6 py-12 sm:py-24 overflow-hidden">
         <GridBg /><ScanLine />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -468,11 +496,11 @@ export default function Landing() {
 ╚═╝  ╚═╝╚══════╝╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝`}</pre>
 
           <div className="space-y-4">
-            <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
               <span className="text-gradient">AI-Powered</span><br />
               <span className="text-foreground">Prompt Injection Firewall</span>
             </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Shield your AI systems from jailbreaks, system prompt leaks, and injection attacks — in{" "}
               <span className="text-primary font-semibold">real time</span>, with a dual-model parallel pipeline.
             </p>
@@ -510,14 +538,14 @@ export default function Landing() {
       </section>
 
       {/* ── PROBLEM STATEMENT ───────────────────── */}
-      <section id="problem" className="relative py-24 px-6 border-t border-border/20 bg-red-950/5">
+      <section id="problem" className="relative py-12 sm:py-24 px-4 sm:px-6 border-t border-border/20 bg-red-950/5">
         <GridBg />
         <div className="relative z-10 max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-mono mb-4">
               <AlertTriangle className="h-3 w-3" /> THREAT LANDSCAPE
             </span>
-            <h2 className="text-3xl sm:text-4xl font-bold">Why Prompt Injection Is the<br /><span className="text-gradient">Fastest-Growing AI Threat</span></h2>
+            <h2 className="text-2xl sm:text-4xl font-bold">Why Prompt Injection Is the<br /><span className="text-gradient">Fastest-Growing AI Threat</span></h2>
             <p className="mt-5 text-muted-foreground max-w-2xl mx-auto text-base leading-relaxed">
               As LLMs are embedded into production systems — email clients, code assistants, customer agents — attackers discovered they can <strong className="text-foreground">hijack AI behaviour through natural language alone</strong>, bypassing every traditional security control.
             </p>
@@ -591,7 +619,7 @@ export default function Landing() {
       </section>
 
       {/* ── ANIMATED ARCHITECTURE ───────────────── */}
-      <section id="architecture" className="relative py-24 px-6 border-t border-border/20">
+      <section id="architecture" className="relative py-12 sm:py-24 px-4 sm:px-6 border-t border-border/20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-xs font-mono text-primary/60 tracking-widest uppercase mb-3">System Design</p>
@@ -622,7 +650,7 @@ export default function Landing() {
       </section>
 
       {/* ── HOW IT WORKS ────────────────────────── */}
-      <section id="detection" className="relative py-24 px-6 border-t border-border/20 bg-card/10">
+      <section id="detection" className="relative py-12 sm:py-24 px-4 sm:px-6 border-t border-border/20 bg-card/10">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-xs font-mono text-primary/60 tracking-widest uppercase mb-3">Detection Architecture</p>
@@ -661,7 +689,7 @@ export default function Landing() {
       </section>
 
       {/* ── ATTACK TYPES ────────────────────────── */}
-      <section id="attacks" className="relative py-24 px-6 border-t border-border/20">
+      <section id="attacks" className="relative py-12 sm:py-24 px-4 sm:px-6 border-t border-border/20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-xs font-mono text-primary/60 tracking-widest uppercase mb-3">Threat Intelligence</p>
@@ -682,7 +710,7 @@ export default function Landing() {
       </section>
 
       {/* ── FEATURES ────────────────────────────── */}
-      <section id="features" className="relative py-24 px-6 border-t border-border/20 bg-card/10">
+      <section id="features" className="relative py-12 sm:py-24 px-4 sm:px-6 border-t border-border/20 bg-card/10">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-xs font-mono text-primary/60 tracking-widest uppercase mb-3">What's Inside</p>
@@ -710,36 +738,47 @@ export default function Landing() {
       </section>
 
       {/* ── FINAL CTA ───────────────────────────── */}
-      <section className="relative py-28 px-6 border-t border-border/20 overflow-hidden">
+      <section className="relative py-16 sm:py-28 px-4 sm:px-6 border-t border-border/20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/3 to-transparent pointer-events-none" />
         <GridBg />
         <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8">
           <img src="/redlock-logo.png" alt="RedLockX" className="h-16 w-16 object-contain glow-red mx-auto" />
-          <h2 className="text-3xl sm:text-5xl font-bold">Ready to shield your<br /><span className="text-gradient">AI system?</span></h2>
-          <p className="text-muted-foreground text-lg">Open the firewall interface and run your first prompt analysis in seconds.</p>
+          <h2 className="text-2xl sm:text-5xl font-bold">Ready to shield your<br /><span className="text-gradient">AI system?</span></h2>
+          <p className="text-muted-foreground text-base sm:text-lg">Open the firewall interface and run your first prompt analysis in seconds.</p>
           <button onClick={() => navigate("/dashboard")}
-            className="group inline-flex items-center gap-3 px-10 py-4 rounded-xl bg-primary text-primary-foreground font-mono font-bold text-base hover:bg-primary/90 transition-all hover:shadow-[0_0_40px_rgba(59,130,246,0.5)] hover:scale-105">
-            <Shield className="h-5 w-5" />
+            className="group inline-flex items-center gap-3 px-6 sm:px-10 py-3.5 sm:py-4 rounded-xl bg-primary text-primary-foreground font-mono font-bold text-sm sm:text-base hover:bg-primary/90 transition-all hover:shadow-[0_0_40px_rgba(59,130,246,0.5)] hover:scale-105">
+            <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
             Get Started — Launch Firewall
-            <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform" />
           </button>
           <p className="text-xs text-muted-foreground/50 font-mono">Powered by HuggingFace Spaces · Built by blackXmask</p>
         </div>
       </section>
 
       {/* ── FOOTER ──────────────────────────────── */}
-      <footer className="border-t border-border/20 py-8 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-muted-foreground/40">
-          <div className="flex items-center gap-2">
-            <img src="/redlock-logo.png" alt="" className="h-5 w-5 object-contain opacity-50" />
-            <span>RedLockX — AI Prompt Injection Firewall</span>
+      <footer className="border-t border-border/20 py-8 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto flex flex-col gap-6">
+          {/* Community badge */}
+          <div className="flex items-center justify-center gap-3 py-4 px-6 rounded-xl border border-border/20 bg-card/10">
+            <img src="/community-logo.avif" alt="Community" className="h-8 w-8 object-contain rounded-md opacity-80" />
+            <div className="text-center sm:text-left">
+              <p className="text-xs font-mono text-foreground/60">Built for the AI Security Community</p>
+              <p className="text-[11px] text-muted-foreground/40 font-mono">Open research · Adversarial ML · Prompt Safety</p>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span>by blackXmask</span>
-            <span>·</span>
-            <a href="https://huggingface.co/blackxmask" target="_blank" rel="noopener" className="hover:text-foreground transition-colors">HuggingFace</a>
-            <span>·</span>
-            <button onClick={() => navigate("/dashboard")} className="hover:text-foreground transition-colors">Launch App</button>
+          {/* Bottom row */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-muted-foreground/40">
+            <div className="flex items-center gap-2">
+              <img src="/redlock-logo.png" alt="" className="h-5 w-5 object-contain opacity-50" />
+              <span>RedLockX — AI Prompt Injection Firewall</span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <span>by blackXmask</span>
+              <span>·</span>
+              <a href="https://huggingface.co/blackxmask" target="_blank" rel="noopener" className="hover:text-foreground transition-colors">HuggingFace</a>
+              <span>·</span>
+              <button onClick={() => navigate("/dashboard")} className="hover:text-foreground transition-colors">Launch App</button>
+            </div>
           </div>
         </div>
       </footer>
