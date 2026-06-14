@@ -19,57 +19,59 @@ const queryClient = new QueryClient({
   },
 });
 
-function AppShell() {
+function AppPage({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     document.documentElement.classList.add("dark");
     document.body.classList.add("scanlines");
   }, []);
-
-  return (
-    <Layout>
-      <Switch>
-        <Route path="/app" component={Analyzer} />
-        <Route path="/app/chat" component={Chat} />
-        <Route path="/app/dashboard" component={Dashboard} />
-        <Route path="/app/logs" component={Logs} />
-        <Route path="/app/settings" component={Settings} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
-  );
+  return <Layout>{children}</Layout>;
 }
 
-function Router() {
+function Routes() {
   const [location] = useLocation();
-  const isApp = location.startsWith("/app");
 
   useEffect(() => {
-    if (isApp) {
-      document.documentElement.classList.add("dark");
-      document.body.classList.add("scanlines");
-    } else {
-      document.documentElement.classList.add("dark");
+    if (location === "/") {
       document.body.classList.remove("scanlines");
+    } else {
+      document.body.classList.add("scanlines");
     }
-  }, [isApp]);
+  }, [location]);
 
   return (
     <Switch>
       <Route path="/" component={Landing} />
-      <Route path="/app" component={AppShell} />
-      <Route path="/app/:rest*" component={AppShell} />
+      <Route path="/app">
+        <AppPage><Analyzer /></AppPage>
+      </Route>
+      <Route path="/app/chat">
+        <AppPage><Chat /></AppPage>
+      </Route>
+      <Route path="/app/dashboard">
+        <AppPage><Dashboard /></AppPage>
+      </Route>
+      <Route path="/app/logs">
+        <AppPage><Logs /></AppPage>
+      </Route>
+      <Route path="/app/settings">
+        <AppPage><Settings /></AppPage>
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
 }
 
 function App() {
+  useEffect(() => {
+    document.documentElement.classList.add("dark");
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <SpiderWeb />
-          <Router />
+          <Routes />
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
