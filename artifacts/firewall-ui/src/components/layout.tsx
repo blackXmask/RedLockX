@@ -1,13 +1,13 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Terminal, Activity, History, Cpu, Radio, Settings2, Bot } from "lucide-react";
+import { Terminal, Activity, History, Cpu, Radio, Settings2, Bot, ArrowLeft } from "lucide-react";
 
 const navItems = [
-  { href: "/",          label: "Analyzer",  icon: Terminal },
-  { href: "/chat",      label: "Chat",      icon: Bot      },
-  { href: "/dashboard", label: "Dashboard", icon: Activity },
-  { href: "/logs",      label: "Logs",      icon: History  },
-  { href: "/settings",  label: "Settings",  icon: Settings2},
+  { href: "/app",          label: "Analyzer",  icon: Terminal },
+  { href: "/app/chat",     label: "Chat",      icon: Bot      },
+  { href: "/app/dashboard",label: "Dashboard", icon: Activity },
+  { href: "/app/logs",     label: "Logs",      icon: History  },
+  { href: "/app/settings", label: "Settings",  icon: Settings2},
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -34,6 +34,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <p className="text-[9px] text-muted-foreground/50 font-mono tracking-[0.2em] uppercase">
             by blackXmask
           </p>
+          {/* Back to landing */}
+          <Link
+            href="/"
+            className="mt-3 flex items-center gap-1 text-[10px] font-mono text-muted-foreground/40 hover:text-muted-foreground/80 transition-colors"
+          >
+            <ArrowLeft className="h-2.5 w-2.5" />
+            Home
+          </Link>
         </div>
 
         {/* Nav */}
