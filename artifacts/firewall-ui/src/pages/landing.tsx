@@ -60,10 +60,10 @@ const CVES = [
 ];
 
 const THREAT_STATS = [
-  { icon: Globe,       val: "#1",    label: "OWASP LLM Top 10",         sub: "Prompt Injection is the top LLM vulnerability for 2023–2025" },
-  { icon: AlertTriangle, val: "43%", label: "of AI Apps at Risk",       sub: "Gartner: ~43% of deployed LLM apps have no injection controls (2024)" },
-  { icon: FileWarning, val: "1,000+",label: "Documented Attacks",       sub: "MITRE ATLAS catalogued 1,000+ real adversarial AI incidents by 2024" },
-  { icon: Server,      val: "$2.8M", label: "Avg. Breach Cost",         sub: "IBM: average cost of an AI-assisted breach reached $2.8M in 2024" },
+  { icon: Globe,         val: "#1",     label: "OWASP LLM Top 10",       sub: "LLM01: Prompt Injection ranks #1 in OWASP LLM Top 10 for both 2023 and 2025" },
+  { icon: AlertTriangle, val: "30%",    label: "of Enterprises at Risk",  sub: "Gartner (2024): 30% of enterprise GenAI deployments will face successful prompt injection by 2025" },
+  { icon: FileWarning,   val: "80+",    label: "Adversarial ML Techniques", sub: "MITRE ATLAS catalogs 80+ adversarial ML techniques across 14 tactic categories in its threat knowledge base" },
+  { icon: Server,        val: "$4.88M", label: "Avg. Breach Cost",        sub: "IBM Cost of a Data Breach Report 2024: global average total cost, up 10% year-over-year" },
 ];
 
 /* ─── Small helpers ────────────────────────────────────────────── */
