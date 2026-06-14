@@ -334,7 +334,7 @@ function Navbar({ onLaunch }: { onLaunch: () => void }) {
   };
 
   return (
-    <nav className={`sticky top-0 z-50 border-b transition-all duration-300 ${
+    <nav className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300 ${
       scrolled
         ? "border-border/50 bg-[hsl(222,50%,2%)]/95 backdrop-blur-md shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
         : "border-border/20 bg-[hsl(222,50%,2.5%)]/80 backdrop-blur-sm"
@@ -445,6 +445,8 @@ export default function Landing() {
       `}</style>
 
       <Navbar onLaunch={() => navigate("/dashboard")} />
+      {/* Spacer so content isn't hidden behind fixed navbar */}
+      <div className="h-14" />
 
       {/* ── HERO ────────────────────────────────── */}
       <section className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-6 py-24 overflow-hidden">
