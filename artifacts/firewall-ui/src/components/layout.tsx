@@ -3,11 +3,11 @@ import { Link, useLocation } from "wouter";
 import { Terminal, Activity, History, Cpu, Radio, Settings2, Bot, ArrowLeft } from "lucide-react";
 
 const navItems = [
-  { href: "/app",          label: "Analyzer",  icon: Terminal },
-  { href: "/app/chat",     label: "Chat",      icon: Bot      },
-  { href: "/app/dashboard",label: "Dashboard", icon: Activity },
-  { href: "/app/logs",     label: "Logs",      icon: History  },
-  { href: "/app/settings", label: "Settings",  icon: Settings2},
+  { href: "/analyzer",  label: "Analyzer",  icon: Terminal },
+  { href: "/chat",      label: "Chat",      icon: Bot      },
+  { href: "/dashboard", label: "Dashboard", icon: Activity },
+  { href: "/logs",      label: "Logs",      icon: History  },
+  { href: "/settings",  label: "Settings",  icon: Settings2},
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {

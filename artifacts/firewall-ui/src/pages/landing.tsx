@@ -141,7 +141,7 @@ export default function Landing() {
               <ExternalLink className="h-3 w-3" />
             </a>
             <button
-              onClick={() => navigate("/app")}
+              onClick={() => navigate("/analyzer")}
               className="flex items-center gap-2 px-4 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-mono font-semibold hover:bg-primary/90 transition-all hover:shadow-[0_0_16px_rgba(59,130,246,0.4)]"
             >
               Launch App <ChevronRight className="h-3.5 w-3.5" />
@@ -206,7 +206,7 @@ export default function Landing() {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 mt-2">
             <button
-              onClick={() => navigate("/app")}
+              onClick={() => navigate("/analyzer")}
               className="group flex items-center justify-center gap-2 px-8 py-3.5 rounded-lg bg-primary text-primary-foreground font-mono font-bold text-sm hover:bg-primary/90 transition-all hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] hover:scale-105"
             >
               <Shield className="h-4 w-4" />
@@ -360,10 +360,10 @@ export default function Landing() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
-              { icon: Shield, title: "Prompt Analyzer", desc: "Paste any prompt and get an instant ALLOW/BLOCK verdict with full explanation.", color: "text-blue-400", path: "/app" },
-              { icon: MessageSquare, title: "Firewall Chat", desc: "Chat with your configured LLM — every message is screened before it reaches the model.", color: "text-purple-400", path: "/app/chat" },
-              { icon: Activity, title: "Dashboard", desc: "Real-time stats: block rate, attack type breakdown, daily activity charts.", color: "text-green-400", path: "/app/dashboard" },
-              { icon: BarChart3, title: "Log History", desc: "Full paginated analysis history with verdict filters and risk scores.", color: "text-orange-400", path: "/app/logs" },
+              { icon: Shield, title: "Prompt Analyzer", desc: "Paste any prompt and get an instant ALLOW/BLOCK verdict with full explanation.", color: "text-blue-400", path: "/analyzer" },
+              { icon: MessageSquare, title: "Firewall Chat", desc: "Chat with your configured LLM — every message is screened before it reaches the model.", color: "text-purple-400", path: "/chat" },
+              { icon: Activity, title: "Dashboard", desc: "Real-time stats: block rate, attack type breakdown, daily activity charts.", color: "text-green-400", path: "/dashboard" },
+              { icon: BarChart3, title: "Log History", desc: "Full paginated analysis history with verdict filters and risk scores.", color: "text-orange-400", path: "/logs" },
             ].map((f) => {
               const Icon = f.icon;
               return (
@@ -396,7 +396,7 @@ export default function Landing() {
             Open the firewall interface and run your first prompt analysis in seconds.
           </p>
           <button
-            onClick={() => navigate("/app")}
+            onClick={() => navigate("/analyzer")}
             className="group inline-flex items-center gap-3 px-10 py-4 rounded-xl bg-primary text-primary-foreground font-mono font-bold text-base hover:bg-primary/90 transition-all hover:shadow-[0_0_40px_rgba(59,130,246,0.5)] hover:scale-105"
           >
             <Shield className="h-5 w-5" />
@@ -421,7 +421,7 @@ export default function Landing() {
             <span>·</span>
             <a href="https://huggingface.co/blackxmask" target="_blank" rel="noopener" className="hover:text-foreground transition-colors">HuggingFace</a>
             <span>·</span>
-            <button onClick={() => navigate("/app")} className="hover:text-foreground transition-colors">Launch App</button>
+            <button onClick={() => navigate("/analyzer")} className="hover:text-foreground transition-colors">Launch App</button>
           </div>
         </div>
       </footer>

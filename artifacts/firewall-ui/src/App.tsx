@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,42 +19,24 @@ const queryClient = new QueryClient({
   },
 });
 
-function AppPage({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    document.documentElement.classList.add("dark");
-    document.body.classList.add("scanlines");
-  }, []);
-  return <Layout>{children}</Layout>;
-}
-
-function Routes() {
-  const [location] = useLocation();
-
-  useEffect(() => {
-    if (location === "/") {
-      document.body.classList.remove("scanlines");
-    } else {
-      document.body.classList.add("scanlines");
-    }
-  }, [location]);
-
+function Router() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
-      <Route path="/app">
-        <AppPage><Analyzer /></AppPage>
+      <Route path="/analyzer">
+        <Layout><Analyzer /></Layout>
       </Route>
-      <Route path="/app/chat">
-        <AppPage><Chat /></AppPage>
+      <Route path="/chat">
+        <Layout><Chat /></Layout>
       </Route>
-      <Route path="/app/dashboard">
-        <AppPage><Dashboard /></AppPage>
+      <Route path="/dashboard">
+        <Layout><Dashboard /></Layout>
       </Route>
-      <Route path="/app/logs">
-        <AppPage><Logs /></AppPage>
+      <Route path="/logs">
+        <Layout><Logs /></Layout>
       </Route>
-      <Route path="/app/settings">
-        <AppPage><Settings /></AppPage>
+      <Route path="/settings">
+        <Layout><Settings /></Layout>
       </Route>
       <Route component={NotFound} />
     </Switch>
@@ -71,7 +53,7 @@ function App() {
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <SpiderWeb />
-          <Routes />
+          <Router />
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
