@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import {
   Shield, Zap, Brain, ChevronRight, AlertTriangle,
   Activity, BarChart3, MessageSquare, ExternalLink,
-  FileWarning, Globe, Lock, Server
+  FileWarning, Globe, Lock, Server, Menu, X
 } from "lucide-react";
 import { useGetStats } from "@workspace/api-client-react";
 
@@ -309,6 +309,122 @@ function ArrowFlow({ active, label }: { active: boolean; label: string }) {
 
 /* ─── Main page ────────────────────────────────────────────────── */
 
+const NAV_LINKS = [
+  { href: "#problem",      label: "Problem"      },
+  { href: "#architecture", label: "Architecture" },
+  { href: "#detection",    label: "Detection"    },
+  { href: "#attacks",      label: "Attacks"      },
+  { href: "#features",     label: "Features"     },
+];
+
+function Navbar({ onLaunch }: { onLaunch: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const scrollTo = (href: string) => {
+    setOpen(false);
+    const el = document.querySelector(href);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  return (
+    <nav className={`sticky top-0 z-50 border-b transition-all duration-300 ${
+      scrolled
+        ? "border-border/50 bg-[hsl(222,50%,2%)]/95 backdrop-blur-md shadow-[0_4px_24px_rgba(0,0,0,0.4)]"
+        : "border-border/20 bg-[hsl(222,50%,2.5%)]/80 backdrop-blur-sm"
+    }`}>
+      <div className="max-w-7xl mx-auto px-6 h-14 flex items-center gap-6">
+        {/* Brand */}
+        <div className="flex items-center gap-2.5 flex-shrink-0">
+          <img src="/redlock-logo.png" alt="RedLockX" className="h-8 w-8 object-contain glow-red" />
+          <span className="font-mono font-bold tracking-widest text-sm text-foreground/90">
+            REDLOCK<span className="text-primary">X</span>
+          </span>
+          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">v2</span>
+        </div>
+
+        {/* Desktop nav links */}
+        <div className="hidden md:flex items-center gap-1 ml-4">
+          {NAV_LINKS.map((link) => (
+            <button
+              key={link.href}
+              onClick={() => scrollTo(link.href)}
+              className="px-3 py-1.5 text-xs font-mono text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-md transition-all"
+            >
+              {link.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Right side */}
+        <div className="ml-auto flex items-center gap-3">
+          <a
+            href="https://huggingface.co/blackxmask"
+            target="_blank"
+            rel="noopener"
+            className="hidden lg:flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
+          >
+            🤗 <span>HuggingFace</span><ExternalLink className="h-3 w-3" />
+          </a>
+
+          {/* Divider */}
+          <div className="hidden lg:block w-px h-4 bg-border/40" />
+
+          <button
+            onClick={onLaunch}
+            className="flex items-center gap-2 px-4 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-mono font-semibold hover:bg-primary/90 transition-all hover:shadow-[0_0_16px_rgba(59,130,246,0.4)]"
+          >
+            <Shield className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Get Started</span>
+            <span className="sm:hidden">App</span>
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="md:hidden flex items-center justify-center w-8 h-8 rounded-md border border-border/40 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+          >
+            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile dropdown */}
+      {open && (
+        <div className="md:hidden border-t border-border/30 bg-[hsl(222,50%,2%)]/98 backdrop-blur-md px-4 py-3 flex flex-col gap-1">
+          {NAV_LINKS.map((link) => (
+            <button
+              key={link.href}
+              onClick={() => scrollTo(link.href)}
+              className="flex items-center gap-2 px-3 py-2.5 text-sm font-mono text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-md text-left transition-all"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+              {link.label}
+            </button>
+          ))}
+          <div className="border-t border-border/20 mt-2 pt-2">
+            <a
+              href="https://huggingface.co/blackxmask"
+              target="_blank"
+              rel="noopener"
+              className="flex items-center gap-2 px-3 py-2 text-xs font-mono text-muted-foreground hover:text-foreground"
+            >
+              🤗 HuggingFace <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
+        </div>
+      )}
+    </nav>
+  );
+}
+
 export default function Landing() {
   const [, navigate] = useLocation();
 
@@ -328,24 +444,7 @@ export default function Landing() {
         .cve-card:hover   { transform: translateY(-2px); }
       `}</style>
 
-      {/* ── NAV ─────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 border-b border-border/30 bg-[hsl(222,50%,2.5%)]/90 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center gap-4">
-          <img src="/redlock-logo.png" alt="RedLockX" className="h-8 w-8 object-contain glow-red" />
-          <span className="font-mono font-bold tracking-widest text-sm text-foreground/90">REDLOCK<span className="text-primary">X</span></span>
-          <span className="ml-2 px-2 py-0.5 rounded text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">v2</span>
-          <div className="ml-auto flex items-center gap-3">
-            <a href="https://huggingface.co/blackxmask" target="_blank" rel="noopener"
-              className="hidden sm:flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors">
-              <span>🤗 HuggingFace</span><ExternalLink className="h-3 w-3" />
-            </a>
-            <button onClick={() => navigate("/dashboard")}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-mono font-semibold hover:bg-primary/90 transition-all hover:shadow-[0_0_16px_rgba(59,130,246,0.4)]">
-              Launch App <ChevronRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar onLaunch={() => navigate("/dashboard")} />
 
       {/* ── HERO ────────────────────────────────── */}
       <section className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-6 py-24 overflow-hidden">
@@ -409,7 +508,7 @@ export default function Landing() {
       </section>
 
       {/* ── PROBLEM STATEMENT ───────────────────── */}
-      <section className="relative py-24 px-6 border-t border-border/20 bg-red-950/5">
+      <section id="problem" className="relative py-24 px-6 border-t border-border/20 bg-red-950/5">
         <GridBg />
         <div className="relative z-10 max-w-6xl mx-auto">
           <div className="text-center mb-16">
@@ -490,7 +589,7 @@ export default function Landing() {
       </section>
 
       {/* ── ANIMATED ARCHITECTURE ───────────────── */}
-      <section className="relative py-24 px-6 border-t border-border/20">
+      <section id="architecture" className="relative py-24 px-6 border-t border-border/20">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-xs font-mono text-primary/60 tracking-widest uppercase mb-3">System Design</p>
@@ -521,7 +620,7 @@ export default function Landing() {
       </section>
 
       {/* ── HOW IT WORKS ────────────────────────── */}
-      <section className="relative py-24 px-6 border-t border-border/20 bg-card/10">
+      <section id="detection" className="relative py-24 px-6 border-t border-border/20 bg-card/10">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-xs font-mono text-primary/60 tracking-widest uppercase mb-3">Detection Architecture</p>
@@ -560,7 +659,7 @@ export default function Landing() {
       </section>
 
       {/* ── ATTACK TYPES ────────────────────────── */}
-      <section className="relative py-24 px-6 border-t border-border/20">
+      <section id="attacks" className="relative py-24 px-6 border-t border-border/20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-xs font-mono text-primary/60 tracking-widest uppercase mb-3">Threat Intelligence</p>
@@ -581,7 +680,7 @@ export default function Landing() {
       </section>
 
       {/* ── FEATURES ────────────────────────────── */}
-      <section className="relative py-24 px-6 border-t border-border/20 bg-card/10">
+      <section id="features" className="relative py-24 px-6 border-t border-border/20 bg-card/10">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-xs font-mono text-primary/60 tracking-widest uppercase mb-3">What's Inside</p>
