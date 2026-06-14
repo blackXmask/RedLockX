@@ -5,12 +5,6 @@ node_modules
 scripts/
 types/
 attached_assets/
+.migration-backup/
 artifacts/mockup-sandbox/
 artifacts/api-server/
-!api/**
-!lib/api-client-react/**
-!lib/api-zod/**
-!lib/api-client-react/
-!lib/api-client-react/**
-!lib/api-zod/
-!lib/api-zod/**

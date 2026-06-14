@@ -28,9 +28,15 @@ A threat intelligence dashboard that analyzes user-submitted prompts for injecti
 
 - `lib/api-spec/openapi.yaml` — API contract (source of truth)
 - `lib/db/src/schema/analysisLogs.ts` — DB schema for analysis_logs table
+- `lib/db/src/schema/chatMessages.ts` — DB schema for chat_messages table
+- `lib/db/src/schema/llmSettings.ts` — DB schema for llm_settings table
 - `artifacts/api-server/src/routes/analyze.ts` — parallel model invocation + decision logic
 - `artifacts/api-server/src/routes/logs.ts` — log history endpoints
 - `artifacts/api-server/src/routes/stats.ts` — analytics/stats endpoints
+- `artifacts/api-server/src/routes/chat.ts` — firewall-gated LLM chat
+- `artifacts/api-server/src/routes/settings.ts` — LLM provider settings
+- `artifacts/api-server/src/lib/analyze-engine.ts` — core analysis engine (HuggingFace + simulation)
+- `artifacts/api-server/src/lib/guardrail-graph.ts` — LangGraph-style state machine
 - `artifacts/firewall-ui/src/` — React frontend
 
 ## Architecture decisions
@@ -44,8 +50,10 @@ A threat intelligence dashboard that analyzes user-submitted prompts for injecti
 ## Product
 
 - **Analyzer** (`/`) — paste any prompt, see verdict (BLOCK/ALLOW), risk %, attack type, model confidence, and explanation
+- **Chat** (`/chat`) — firewall-gated LLM chat (configure API key in Settings first)
 - **Logs** (`/logs`) — paginated history of all analyses with filterable verdicts
 - **Dashboard** (`/dashboard`) — stats cards, attack-type distribution chart, 7-day activity chart
+- **Settings** (`/settings`) — configure LLM provider (OpenAI, Groq, Gemini, custom)
 
 ## User preferences
 

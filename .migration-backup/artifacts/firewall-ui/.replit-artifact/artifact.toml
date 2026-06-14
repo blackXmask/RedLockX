@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Prompt Injection Firewall"
+title = "PromptFW — Prompt Injection Firewall"
 version = "1.0.0"
 id = "artifacts/firewall-ui"
 router = "path"

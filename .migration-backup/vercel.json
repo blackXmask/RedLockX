@@ -1,3 +1,9 @@
 {
-  "outputDirectory": "artifacts/firewall-ui/dist"
+  "buildCommand": "pnpm --filter @workspace/firewall-ui run build",
+  "outputDirectory": "artifacts/firewall-ui/dist",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
