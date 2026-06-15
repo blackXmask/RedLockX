@@ -1,4 +1,5 @@
 {
+  "version": 2,
   "buildCommand": "cd ../.. && pnpm --filter @workspace/firewall-ui run build",
   "outputDirectory": "artifacts/firewall-ui/dist/public",
   "installCommand": "npm install -g pnpm && pnpm install",
@@ -7,13 +8,6 @@
     "PORT": "3000"
   },
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://7fdc5313-3e5a-40df-986d-b1d213cdc68c-00-63cwtwczsf8r.sisko.replit.dev/api/:path*"
-    },
-    {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
