@@ -12,14 +12,11 @@
 
 ---
 
-```
-██████╗ ███████╗██████╗ ██╗      ██████╗  ██████╗██╗  ██╗██╗  ██╗
-██╔══██╗██╔════╝██╔══██╗██║     ██╔═══██╗██╔════╝██║ ██╔╝╚██╗██╔╝
-██████╔╝█████╗  ██║  ██║██║     ██║   ██║██║     █████╔╝  ╚███╔╝ 
-██╔══██╗██╔══╝  ██║  ██║██║     ██║   ██║██║     ██╔═██╗  ██╔██╗ 
-██║  ██║███████╗██████╔╝███████╗╚██████╔╝╚██████╗██║  ██╗██╔╝ ██╗
-╚═╝  ╚═╝╚══════╝╚═════╝ ╚══════╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝
-```
+
+
+<img width="1917" height="900" alt="image" src="https://github.com/user-attachments/assets/479eede1-f4e6-4793-a382-3e3593b6ed3e" />
+
+<img width="1471" height="477" alt="image" src="https://github.com/user-attachments/assets/f8782ecf-4775-4708-955e-316cb9fc8931" />
 
 *Shield your AI systems from prompt injection attacks in real time.*
 
@@ -54,6 +51,8 @@ RedLockX runs a **dual-model parallel pipeline**:
 | 🔬 **Hybrid Engine** | Rule-based + statistical | Fast heuristic pre-filter |
 | 🧬 **DeBERTa-v3** | Fine-tuned transformer | Deep semantic classification |
 | ⚖️ **Decision Node** | Weighted aggregator | Final ALLOW / BLOCK verdict |
+
+<img width="4419" height="2504" alt="workflow excalidraw" src="https://github.com/user-attachments/assets/a90d2e62-922d-4c4d-acf5-222acbbbff9e" />
 
 ### Attack Types Detected
 
