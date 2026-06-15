@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useLocation } from "wouter";
 import {
   Shield, Zap, Brain, ChevronRight, ChevronDown, AlertTriangle,
   Activity, BarChart3, MessageSquare, ExternalLink,
@@ -455,7 +454,7 @@ function Navbar({ onLaunch }: { onLaunch: () => void }) {
 }
 
 export default function Landing() {
-  const [, navigate] = useLocation();
+  const go = (path: string) => { window.location.href = path; };
 
   return (
     <div className="min-h-screen bg-[hsl(222,50%,2.5%)] text-foreground overflow-x-hidden">
@@ -473,7 +472,7 @@ export default function Landing() {
         .cve-card:hover   { transform: translateY(-2px); }
       `}</style>
 
-      <Navbar onLaunch={() => navigate("/dashboard")} />
+      <Navbar onLaunch={() => go("/dashboard")} />
       {/* Spacer so content isn't hidden behind fixed navbar */}
       <div className="h-14" />
 
@@ -516,7 +515,7 @@ export default function Landing() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mt-2">
-            <button onClick={() => navigate("/dashboard")}
+            <button onClick={() => go("/dashboard")}
               className="group flex items-center justify-center gap-2 px-8 py-3.5 rounded-lg bg-primary text-primary-foreground font-mono font-bold text-sm hover:bg-primary/90 transition-all hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] hover:scale-105">
               <Shield className="h-4 w-4" />
               Get Started — Try the Firewall
@@ -726,7 +725,7 @@ export default function Landing() {
             ].map((f) => {
               const Icon = f.icon;
               return (
-                <button key={f.title} onClick={() => navigate(f.path)}
+                <button key={f.title} onClick={() => go(f.path)}
                   className="text-left p-5 rounded-xl border border-border/30 bg-card/20 hover:bg-card/40 hover:border-border/60 transition-all hover:-translate-y-1 group">
                   <Icon className={`h-6 w-6 ${f.color} mb-3 group-hover:scale-110 transition-transform`} />
                   <h3 className="font-bold text-sm text-foreground mb-1">{f.title}</h3>
@@ -746,7 +745,7 @@ export default function Landing() {
           <img src="/redlock-logo.png" alt="RedLockX" className="h-16 w-16 object-contain glow-red mx-auto" />
           <h2 className="text-2xl sm:text-5xl font-bold">Ready to shield your<br /><span className="text-gradient">AI system?</span></h2>
           <p className="text-muted-foreground text-base sm:text-lg">Open the firewall interface and run your first prompt analysis in seconds.</p>
-          <button onClick={() => navigate("/dashboard")}
+          <button onClick={() => go("/dashboard")}
             className="group inline-flex items-center gap-3 px-6 sm:px-10 py-3.5 sm:py-4 rounded-xl bg-primary text-primary-foreground font-mono font-bold text-sm sm:text-base hover:bg-primary/90 transition-all hover:shadow-[0_0_40px_rgba(59,130,246,0.5)] hover:scale-105">
             <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
             Get Started — Launch Firewall
@@ -778,7 +777,7 @@ export default function Landing() {
               <span>·</span>
               <a href="https://huggingface.co/blackxmask" target="_blank" rel="noopener" className="hover:text-foreground transition-colors">HuggingFace</a>
               <span>·</span>
-              <button onClick={() => navigate("/dashboard")} className="hover:text-foreground transition-colors">Launch App</button>
+              <button onClick={() => go("/dashboard")} className="hover:text-foreground transition-colors">Launch App</button>
             </div>
           </div>
         </div>

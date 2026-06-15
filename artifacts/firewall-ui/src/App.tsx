@@ -26,15 +26,15 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
   render() {
     if (this.state.error) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background text-foreground p-8">
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-[hsl(222,47%,4%)] text-slate-100 p-8">
           <div className="text-4xl">⚠️</div>
           <h1 className="text-xl font-bold font-mono text-red-400">Something went wrong</h1>
-          <p className="text-sm text-muted-foreground font-mono max-w-md text-center">
+          <p className="text-sm text-slate-400 font-mono max-w-md text-center">
             {(this.state.error as Error).message}
           </p>
           <button
             onClick={() => { this.setState({ error: null }); window.location.href = "/"; }}
-            className="mt-2 px-4 py-2 rounded-lg border border-border bg-card text-sm font-mono hover:border-primary transition-colors"
+            className="mt-2 px-4 py-2 rounded-lg border border-slate-600 bg-slate-800 text-sm font-mono hover:border-blue-500 transition-colors"
           >
             Go home
           </button>
@@ -45,25 +45,23 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
   }
 }
 
+function WithLayout({ children }: { children: ReactNode }) {
+  return (
+    <ErrorBoundary>
+      <Layout>{children}</Layout>
+    </ErrorBoundary>
+  );
+}
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
-      <Route path="/analyzer">
-        <ErrorBoundary><Layout><Analyzer /></Layout></ErrorBoundary>
-      </Route>
-      <Route path="/chat">
-        <ErrorBoundary><Layout><Chat /></Layout></ErrorBoundary>
-      </Route>
-      <Route path="/dashboard">
-        <ErrorBoundary><Layout><Dashboard /></Layout></ErrorBoundary>
-      </Route>
-      <Route path="/logs">
-        <ErrorBoundary><Layout><Logs /></Layout></ErrorBoundary>
-      </Route>
-      <Route path="/settings">
-        <ErrorBoundary><Layout><Settings /></Layout></ErrorBoundary>
-      </Route>
+      <Route path="/analyzer" component={() => <WithLayout><Analyzer /></WithLayout>} />
+      <Route path="/chat" component={() => <WithLayout><Chat /></WithLayout>} />
+      <Route path="/dashboard" component={() => <WithLayout><Dashboard /></WithLayout>} />
+      <Route path="/logs" component={() => <WithLayout><Logs /></WithLayout>} />
+      <Route path="/settings" component={() => <WithLayout><Settings /></WithLayout>} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -77,8 +75,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <SpiderWeb />
+        <WouterRouter>
+          <ErrorBoundary>
+            <SpiderWeb />
+          </ErrorBoundary>
           <ErrorBoundary>
             <Router />
           </ErrorBoundary>
