@@ -20,7 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ]);
 
     return res.json({
-      logs: logsRes.rows.map((l) => ({
+      logs: logsRes.rows.map((l: Record<string, unknown>) => ({
         id: l.id, prompt: l.prompt, verdict: l.verdict, riskScore: l.risk_score,
         isSafe: l.is_safe, attackType: l.attack_type, hybridProbability: l.hybrid_probability,
         mlStatus: l.ml_status, mlConfidence: l.ml_confidence, explanation: l.explanation,
