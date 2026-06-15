@@ -79,17 +79,18 @@ function GlowDot() {
 
 function StatsBadge() {
   const { data: stats } = useGetStats();
+  const validStats = stats && typeof stats === "object" && typeof (stats as any).totalAnalyzed === "number" ? stats : null;
   return (
     <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 px-4 py-2 rounded-full border border-border/40 bg-card/30 backdrop-blur-sm text-xs font-mono text-muted-foreground">
       <span className="flex items-center gap-1.5"><GlowDot /><span className="text-green-400">LIVE</span></span>
-      {stats && (
+      {validStats && (
         <>
           <span className="hidden sm:inline text-border">|</span>
-          <span><span className="text-foreground font-semibold">{stats.totalAnalyzed.toLocaleString()}</span> analyzed</span>
+          <span><span className="text-foreground font-semibold">{validStats.totalAnalyzed.toLocaleString()}</span> analyzed</span>
           <span className="hidden sm:inline text-border">|</span>
-          <span><span className="text-red-400 font-semibold">{stats.totalBlocked.toLocaleString()}</span> blocked</span>
+          <span><span className="text-red-400 font-semibold">{validStats.totalBlocked.toLocaleString()}</span> blocked</span>
           <span className="hidden sm:inline text-border">|</span>
-          <span><span className="text-foreground font-semibold">{stats.blockRate.toFixed(1)}%</span> block rate</span>
+          <span><span className="text-foreground font-semibold">{validStats.blockRate.toFixed(1)}%</span> block rate</span>
         </>
       )}
     </div>
