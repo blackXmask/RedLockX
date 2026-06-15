@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "PromptFW — Prompt Injection Firewall"
+title = "RedLockX Firewall UI"
 version = "1.0.0"
 id = "artifacts/firewall-ui"
 router = "path"

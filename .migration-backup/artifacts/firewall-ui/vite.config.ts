@@ -4,23 +4,19 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-// Allow builds to run in CI without requiring env vars.
-// Use sensible defaults when `PORT` or `BASE_PATH` are not provided.
-const rawPort = process.env.PORT ?? process.env.VITE_PORT ?? "5173";
-const port = Number(rawPort);
-if (Number.isNaN(port) || port <= 0) {
-  // fallback to 5173 when invalid
-  console.warn(`Invalid PORT value: "${rawPort}", falling back to 5173`);
-}
+const rawPort = process.env.PORT;
+const port = rawPort && !Number.isNaN(Number(rawPort)) && Number(rawPort) > 0
+  ? Number(rawPort)
+  : 3000;
 
-const basePath = process.env.BASE_PATH ?? process.env.VITE_BASE_PATH ?? "/";
+const basePath = process.env.BASE_PATH ?? "/";
 
 export default defineConfig({
   base: basePath,
   plugins: [
     react(),
     tailwindcss(),
-    ...(process.env.NODE_ENV !== "production" ? [runtimeErrorOverlay()] : []),
+    runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -44,22 +40,8 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname),
   build: {
-    // write to `dist` so Vercel finds the entrypoint `index.html` at the expected location
-    outDir: path.resolve(import.meta.dirname, "dist"),
-    // disable sourcemaps in production builds to avoid sourcemap resolution errors
-    sourcemap: false,
+    outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    // increase chunk size warning limit to avoid noisy warnings for large bundles (value in kB)
-    chunkSizeWarningLimit: 2000,
-  },
-  esbuild: {
-    // ensure esbuild doesn't generate or consume sourcemaps during transforms
-    sourcemap: false,
-  },
-  optimizeDeps: {
-    esbuildOptions: {
-      sourcemap: false,
-    },
   },
   server: {
     port,

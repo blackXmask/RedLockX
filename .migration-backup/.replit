@@ -21,7 +21,7 @@ timeoutMs = 20000
 
 [[ports]]
 localPort = 8080
-externalPort = 80
+externalPort = 8080
 
 [[ports]]
 localPort = 8081
@@ -33,9 +33,8 @@ externalPort = 3001
 
 [[ports]]
 localPort = 20534
-externalPort = 3000
+externalPort = 80
 
 [userenv]
 
 [userenv.shared]
-SUPABASE_URL = "https://dvmwyvoenkhmahlvvwqe.supabase.co"

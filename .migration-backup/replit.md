@@ -1,18 +1,15 @@
-# PromptFW — Prompt Injection Firewall
+# [Project name]
 
-A threat intelligence dashboard that analyzes user-submitted prompts for injection attacks using two parallel AI models, returning a real-time BLOCK/ALLOW verdict.
+_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080)
-- `pnpm --filter @workspace/firewall-ui run dev` — run the React frontend
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
-- Optional env: `HYBRID_SPACE_URL` — HuggingFace Hybrid Space endpoint (XGBoost + embeddings)
-- Optional env: `ML_SPACE_URL` — HuggingFace DeBERTa Space endpoint
 
 ## Stack
 
@@ -22,38 +19,18 @@ A threat intelligence dashboard that analyzes user-submitted prompts for injecti
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
-- Frontend: React + Vite, TailwindCSS, Recharts, React Query
 
 ## Where things live
 
-- `lib/api-spec/openapi.yaml` — API contract (source of truth)
-- `lib/db/src/schema/analysisLogs.ts` — DB schema for analysis_logs table
-- `lib/db/src/schema/chatMessages.ts` — DB schema for chat_messages table
-- `lib/db/src/schema/llmSettings.ts` — DB schema for llm_settings table
-- `artifacts/api-server/src/routes/analyze.ts` — parallel model invocation + decision logic
-- `artifacts/api-server/src/routes/logs.ts` — log history endpoints
-- `artifacts/api-server/src/routes/stats.ts` — analytics/stats endpoints
-- `artifacts/api-server/src/routes/chat.ts` — firewall-gated LLM chat
-- `artifacts/api-server/src/routes/settings.ts` — LLM provider settings
-- `artifacts/api-server/src/lib/analyze-engine.ts` — core analysis engine (HuggingFace + simulation)
-- `artifacts/api-server/src/lib/guardrail-graph.ts` — LangGraph-style state machine
-- `artifacts/firewall-ui/src/` — React frontend
+_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
 
 ## Architecture decisions
 
-- When `HYBRID_SPACE_URL` / `ML_SPACE_URL` are not set, the server uses a deterministic simulation based on keyword matching. This makes the app fully functional without HuggingFace access.
-- Both models run in parallel via `Promise.all` for minimum latency.
-- Risk score uses a weighted blend: `(0.6 * hybridProb) + (0.4 * mlConfidence)` when ML says DANGEROUS.
-- Verdict is BLOCK if `hybridProb > 0.5 OR mlStatus == "DANGEROUS"`.
-- All analysis results are persisted to PostgreSQL immediately after scoring.
+_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
 
 ## Product
 
-- **Analyzer** (`/`) — paste any prompt, see verdict (BLOCK/ALLOW), risk %, attack type, model confidence, and explanation
-- **Chat** (`/chat`) — firewall-gated LLM chat (configure API key in Settings first)
-- **Logs** (`/logs`) — paginated history of all analyses with filterable verdicts
-- **Dashboard** (`/dashboard`) — stats cards, attack-type distribution chart, 7-day activity chart
-- **Settings** (`/settings`) — configure LLM provider (OpenAI, Groq, Gemini, custom)
+_Describe the high-level user-facing capabilities of this app once they exist._
 
 ## User preferences
 
@@ -61,9 +38,7 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-- Do not change `info.title` in `openapi.yaml` — Orval uses it to derive generated filenames
-- Body schemas must use entity-shaped names (`PromptInput`) not operation-shaped (`AnalyzePromptBody`) to avoid TS2308 collisions
-- After any spec change, always run `pnpm --filter @workspace/api-spec run codegen`
+_Populate as you build — sharp edges, "always run X before Y" rules._
 
 ## Pointers
 

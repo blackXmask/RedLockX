@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import {
   useGetStats,
   useGetAttackTypeBreakdown,
@@ -10,7 +11,7 @@ import {
 import {
   Shield, ShieldAlert, Activity, BarChart3,
   TrendingUp, Percent, RefreshCw, Cpu, Lock,
-  AlertTriangle, CheckCircle, Zap, Clock,
+  AlertTriangle, CheckCircle, Zap, Clock, Home,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -151,6 +152,7 @@ function attackBadgeCls(type: string | null) {
 
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function Dashboard() {
+  const [, navigate] = useLocation();
   const [lastRefresh, setLastRefresh] = useState(() => new Date());
   const { logs: threatLogs, loading: feedLoading, reload: reloadFeed } = useLiveFeed(POLL_MS);
 
@@ -169,7 +171,8 @@ export default function Dashboard() {
     setLastRefresh(new Date());
   }
 
-  const hasActivity = activity?.some((d) => d.analyzed > 0);
+  const activityData = Array.isArray(activity) ? activity : [];
+  const hasActivity = activityData.some((d) => d.analyzed > 0);
   const blockRate = stats?.blockRate ?? 0;
   const { label: threatLabel, color: threatColor, ring: threatRing } = threatLevel(blockRate);
   const securityScore = Math.max(0, Math.round(100 - blockRate * 0.7 - (stats?.avgRiskScore ?? 0) * 0.2));
@@ -177,26 +180,60 @@ export default function Dashboard() {
   return (
     <div className="space-y-5">
       {/* ── Header ── */}
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-black tracking-tight text-white">Dashboard</h2>
-          <p className="text-xs text-slate-500 font-mono mt-0.5">
-            RedLockX · AI Prompt Injection Firewall · Real-time threat monitoring
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="hidden md:block text-[10px] font-mono text-slate-600">
-            {lastRefresh.toLocaleTimeString()}
-          </span>
-          <button onClick={handleRefresh}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/60 hover:border-blue-500/50 hover:bg-blue-500/10 text-slate-400 hover:text-white transition-all text-xs font-mono">
-            <RefreshCw className="h-3 w-3" />Refresh
-          </button>
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${threatRing} bg-slate-900/60`}>
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: threatColor }} />
-            <span className="text-xs font-mono font-bold tracking-widest uppercase" style={{ color: threatColor }}>
-              {threatLabel}
-            </span>
+      <div className="relative rounded-xl border border-slate-700/60 bg-gradient-to-r from-slate-900 via-slate-800/80 to-slate-900 overflow-hidden">
+        {/* Subtle grid overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "linear-gradient(hsl(215,100%,60%) 1px,transparent 1px),linear-gradient(90deg,hsl(215,100%,60%) 1px,transparent 1px)", backgroundSize: "40px 40px" }} />
+        {/* Left glow accent */}
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500/80 via-purple-500/60 to-transparent rounded-l-xl" />
+
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4">
+          {/* Left: brand + title */}
+          <div className="flex items-center gap-4">
+            <div className="relative flex-shrink-0">
+              <img src="/redlock-logo.png" alt="RedLockX" className="h-10 w-10 object-contain" style={{ filter: "drop-shadow(0 0 10px rgba(220,30,30,0.5))" }} />
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-900 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white leading-none">Dashboard</h2>
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-blue-500/15 text-blue-400 border border-blue-500/25">LIVE</span>
+                <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded border text-[11px] font-mono font-bold tracking-widest ${threatRing} bg-slate-900/60`}>
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: threatColor }} />
+                  <span style={{ color: threatColor }}>{threatLabel}</span>
+                </div>
+              </div>
+              <p className="text-[11px] text-slate-500 font-mono mt-1">
+                RedLockX · Prompt Injection Firewall ·{" "}
+                <span className="text-slate-600">refreshed {lastRefresh.toLocaleTimeString()}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Right: actions */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Mini stat pills */}
+            <div className="hidden lg:flex items-center gap-2 mr-2">
+              <span className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-[11px] font-mono text-slate-300">
+                <span className="text-white font-bold">{stats?.totalAnalyzed ?? "—"}</span> analyzed
+              </span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-[11px] font-mono text-slate-300">
+                <span className="text-red-400 font-bold">{stats?.totalBlocked ?? "—"}</span> blocked
+              </span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-[11px] font-mono text-slate-300">
+                <span className="text-yellow-400 font-bold">{stats?.blockRate != null ? `${stats.blockRate.toFixed(1)}%` : "—"}</span> rate
+              </span>
+            </div>
+
+            <button onClick={() => navigate("/")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/60 hover:border-blue-500/50 hover:bg-blue-500/10 text-slate-400 hover:text-white transition-all text-xs font-mono">
+              <Home className="h-3 w-3" />
+              <span>Home</span>
+            </button>
+            <button onClick={handleRefresh}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/60 hover:border-blue-500/50 hover:bg-blue-500/10 text-slate-400 hover:text-white transition-all text-xs font-mono">
+              <RefreshCw className="h-3 w-3" />
+              <span>Refresh</span>
+            </button>
           </div>
         </div>
       </div>
@@ -237,7 +274,7 @@ export default function Dashboard() {
             {isLoadingActivity ? <Skeleton className="w-full h-full rounded-lg bg-slate-800/50" /> :
             hasActivity ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={activity} margin={{ top: 4, right: 4, left: -24, bottom: 0 }} barCategoryGap="28%" barGap={3}>
+                <BarChart data={activityData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }} barCategoryGap="28%" barGap={3}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
                   <XAxis dataKey="date" tickFormatter={fmtDate} stroke="#334155"
                     tick={{ fill: "#64748b", fontSize: 11, fontFamily: "monospace" }} tickLine={false} axisLine={false} />
@@ -295,7 +332,7 @@ export default function Dashboard() {
           </div>
           <div className="p-4 h-[240px]">
             {isLoadingTypes ? <Skeleton className="w-full h-full rounded-lg bg-slate-800/50" /> :
-            attackTypes && attackTypes.length > 0 ? (
+            Array.isArray(attackTypes) && attackTypes.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={attackTypes} layout="vertical" margin={{ top: 0, right: 8, left: 4, bottom: 0 }} barSize={12}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.03)" />
