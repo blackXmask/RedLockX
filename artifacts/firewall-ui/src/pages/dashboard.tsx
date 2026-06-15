@@ -171,7 +171,8 @@ export default function Dashboard() {
     setLastRefresh(new Date());
   }
 
-  const hasActivity = activity?.some((d) => d.analyzed > 0);
+  const activityData = Array.isArray(activity) ? activity : [];
+  const hasActivity = activityData.some((d) => d.analyzed > 0);
   const blockRate = stats?.blockRate ?? 0;
   const { label: threatLabel, color: threatColor, ring: threatRing } = threatLevel(blockRate);
   const securityScore = Math.max(0, Math.round(100 - blockRate * 0.7 - (stats?.avgRiskScore ?? 0) * 0.2));
@@ -273,7 +274,7 @@ export default function Dashboard() {
             {isLoadingActivity ? <Skeleton className="w-full h-full rounded-lg bg-slate-800/50" /> :
             hasActivity ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={activity} margin={{ top: 4, right: 4, left: -24, bottom: 0 }} barCategoryGap="28%" barGap={3}>
+                <BarChart data={activityData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }} barCategoryGap="28%" barGap={3}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
                   <XAxis dataKey="date" tickFormatter={fmtDate} stroke="#334155"
                     tick={{ fill: "#64748b", fontSize: 11, fontFamily: "monospace" }} tickLine={false} axisLine={false} />
@@ -331,7 +332,7 @@ export default function Dashboard() {
           </div>
           <div className="p-4 h-[240px]">
             {isLoadingTypes ? <Skeleton className="w-full h-full rounded-lg bg-slate-800/50" /> :
-            attackTypes && attackTypes.length > 0 ? (
+            Array.isArray(attackTypes) && attackTypes.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={attackTypes} layout="vertical" margin={{ top: 0, right: 8, left: 4, bottom: 0 }} barSize={12}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.03)" />
